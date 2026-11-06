@@ -11,7 +11,7 @@ keywords = ["water hammer", "hydraulic transients", "method of characteristics",
 [metadata]
 author_name = "Deepak Kumar"
 author_email = "deepakkumar.dar@gmail.com"
-author_organization = ""  # fill in: your university, institute, lab or employer, or exactly "Independent Researcher"
+author_organization = "Independent Researcher"
 author_profile = ""  # fill in: Google Scholar / LinkedIn / personal site URL
 conflicts_of_interest = "None"
 domain = "engineering-sciences"
