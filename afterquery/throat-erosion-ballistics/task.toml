@@ -6,14 +6,22 @@ name = "afterquery/throat-erosion-ballistics"
 [metadata]
 author_name = "Deepak Kumar"
 author_email = "deepakkumar.dar@gmail.com"
+author_organization = "Independent"
+author_profile = "Mechanical engineer working on engineering test-data analysis and scientific computing"
+conflicts_of_interest = "None"
 domain = "engineering-sciences"
 field = "mechanical-aerospace-engineering"
 subfield = "solid rocket propulsion - static-fire ballistic reconstruction with nozzle throat erosion"
-difficulty = "hard"
 category = "scientific-computing"
+subcategory = "solid rocket motor internal ballistics and test-data reduction"
+difficulty = "hard"
 tags = ["solid-rocket-motor", "internal-ballistics", "nozzle-erosion", "burn-rate", "inverse-problem", "system-identification"]
-expert_time_estimate_min = 120.0
-junior_time_estimate_min = 480.0
+expert_time_estimate_hours = 2.0
+junior_time_estimate_hours = 8.0
+relevant_experience = "Mechanical and aerospace engineering: thermofluids, nozzle gas dynamics, and reduction of instrumented test-stand data (pressure transducers, load cells) into performance parameters."
+difficulty_explanation = "The throat erodes during the burn and only pre- and post-fire diameters are known. The classic single-firing burn-rate reduction assumes a constant throat and gives a meaningless pressure exponent; the usual practitioner fixes (linear or pressure-weighted interpolation of the throat between the two measurements) ignore the thermal onset delay of erosion and bias the throat history by about 0.2 mm and the exponent by about 0.04 without visibly degrading the pressure or thrust fits. The solver must recover the throat history from the thrust coefficient (throat area enters both directly and through the isentropic area ratio), separate it from an unknown jet efficiency, then do a mass-balance c* and web-regression burn-rate reduction through the BATES geometry while handling gauge pressure, a load-cell zero offset, igniter gas and unchoked start-up/tail-off flow. This is work done by propulsion test engineers after development firings. Data are synthetic from a 0-D internal-ballistics simulation with realistic motor size, propellant properties, erosion rate and sensor noise."
+solution_explanation = "Convert gauge pressure to absolute and zero the load cell from the pre-fire baseline. Tabulate isentropic exit-pressure ratio and jet thrust coefficient against throat diameter, and invert the measured thrust sample by sample for the throat diameter. Calibrate the jet efficiency so the inverted diameter in the early burn (before erosion starts) equals the pre-fire value; the post-fire measurement serves as a check. Smooth the throat history, compute c* from the overall mass balance (propellant plus igniter gas, choked/subsonic flow function), reconstruct web regression from discharged mass plus stored chamber gas through the BATES mass-versus-web relation, differentiate, and fit log burn rate against log pressure for n and r at 4 MPa. Total impulse is the integral of zeroed thrust."
+verification_explanation = "The verifier reads /app/output/ballistics.json, rejects symlinks, non-finite values and missing or extra keys, and compares each quantity with the simulation truth: c* within 1.5 %, jet efficiency within 0.01, exponent within 0.02, burn rate at 4 MPa within 2 %, total impulse within 1 %, and throat diameter at five times within 0.05 mm. Tolerances are about 1.5-2x the spread of correct methods, including an independent forward-model least-squares fit; constant-throat, linear and pressure-weighted throat interpolation, gauge-as-absolute and unzeroed-load-cell shortcuts all fail."
 
 [verifier]
 timeout_sec = 900.0
