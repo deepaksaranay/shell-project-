@@ -1,0 +1,156 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-8.4.1, pluggy-1.7.0
+rootdir: /tests
+plugins: json-ctrf-0.3.5, anyio-4.15.1
+collected 12 items
+
+../../../../../tests/test_outputs.py EEEEEEEEEEEE                        [100%]
+
+==================================== ERRORS ====================================
+______________________ ERROR at setup of test_exact_keys _______________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+__________________ ERROR at setup of test_all_finite_numbers ___________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+________________ ERROR at setup of test_characteristic_velocity ________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+____________________ ERROR at setup of test_jet_efficiency _____________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+__________________ ERROR at setup of test_burn_rate_exponent ___________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+___________________ ERROR at setup of test_burn_rate_at_4mpa ___________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________________ ERROR at setup of test_total_impulse _____________________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________ ERROR at setup of test_throat_diameter_history[1.0] ______________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________ ERROR at setup of test_throat_diameter_history[1.5] ______________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________ ERROR at setup of test_throat_diameter_history[2.0] ______________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________ ERROR at setup of test_throat_diameter_history[2.5] ______________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+_____________ ERROR at setup of test_throat_diameter_history[3.0] ______________
+
+    @pytest.fixture(scope="module")
+    def result():
+>       assert OUT.exists(), f"missing {OUT}"
+E       AssertionError: missing /app/output/ballistics.json
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('/app/output/ballistics.json').exists
+
+/tests/test_outputs.py:31: AssertionError
+=========================== short test summary info ============================
+ERROR ../../../../../tests/test_outputs.py::test_exact_keys - AssertionError:...
+ERROR ../../../../../tests/test_outputs.py::test_all_finite_numbers - Asserti...
+ERROR ../../../../../tests/test_outputs.py::test_characteristic_velocity - As...
+ERROR ../../../../../tests/test_outputs.py::test_jet_efficiency - AssertionEr...
+ERROR ../../../../../tests/test_outputs.py::test_burn_rate_exponent - Asserti...
+ERROR ../../../../../tests/test_outputs.py::test_burn_rate_at_4mpa - Assertio...
+ERROR ../../../../../tests/test_outputs.py::test_total_impulse - AssertionErr...
+ERROR ../../../../../tests/test_outputs.py::test_throat_diameter_history[1.0]
+ERROR ../../../../../tests/test_outputs.py::test_throat_diameter_history[1.5]
+ERROR ../../../../../tests/test_outputs.py::test_throat_diameter_history[2.0]
+ERROR ../../../../../tests/test_outputs.py::test_throat_diameter_history[2.5]
+ERROR ../../../../../tests/test_outputs.py::test_throat_diameter_history[3.0]
+============================== 12 errors in 0.06s ==============================
+nop reward: 0

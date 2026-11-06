@@ -1,0 +1,14 @@
+# Correct-method variants (should pass)
+reference :: 12 passed in 0.02s
+no gas-storage term in web regression :: 12 passed in 0.02s
+choked flow assumed at all pressures :: 12 passed in 0.02s
+igniter gas mass ignored :: 12 passed in 0.02s
+heavier throat smoothing (0.6 s) :: 12 passed in 0.02s
+steady-window threshold 60 % :: 12 passed in 0.02s
+# Shortcuts / errors (should fail)
+constant pre-fire throat (classic single-firing method) :: 7 failed, 5 passed in 0.06s
+throat linearly interpolated pre->post in time :: 8 failed, 4 passed in 0.04s
+throat erosion weighted by cumulative pressure (no onset delay) :: 7 failed, 5 passed in 0.04s
+gauge pressure used as absolute :: 6 failed, 6 passed in 0.04s
+load-cell zero offset not removed :: 7 failed, 5 passed in 0.05s
+divergence factor omitted :: 1 failed, 11 passed in 0.03s

@@ -7,7 +7,7 @@ import json
 import pathlib
 import numpy as np
 
-ROOT = pathlib.Path(__file__).resolve().parents[1] / "bearing-impedance-identification"
+ROOT = pathlib.Path(__file__).resolve().parents[2]  # task bundle root
 DATA = ROOT / "environment" / "data"
 G0 = 9.80665
 

@@ -1,0 +1,26 @@
+{
+  "sample_rate_hz": 2000.0,
+  "ambient_pressure_MPa": 0.0942,
+  "propellant": {
+    "density_kg_m3": 1765.0,
+    "loaded_mass_kg": 3.3286,
+    "exhaust_gamma": 1.21
+  },
+  "grain": {
+    "type": "single cylindrical BATES segment: bore and both end faces burn, outer surface bonded/inhibited",
+    "outer_diameter_mm": 98.0,
+    "initial_bore_diameter_mm": 40.0,
+    "length_mm": 300.0
+  },
+  "igniter_gas_mass_kg": 0.01,
+  "nozzle": {
+    "pre_fire_throat_diameter_mm": 18.0,
+    "post_fire_throat_diameter_mm": 19.305,
+    "exit_diameter_mm": 46.0,
+    "divergence_half_angle_deg": 15.0
+  },
+  "channels": {
+    "chamber_pressure_MPa_gauge": "chamber pressure, gauge (relative to ambient), MPa",
+    "thrust_N": "load-cell thrust, N"
+  }
+}
