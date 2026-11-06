@@ -8,62 +8,57 @@
 - **Task name:** `blade-tip-timing`
 - **Bundle:** `kepler/blade-tip-timing.zip`. It contains task.toml,
   instruction.md, README.md, environment/, solution/, tests/ and authoring/.
+- **Deliverable:** the program `/app/btt_analyze.py`, run on held-out
+  datasets. This changed from an answer file to address the similarity
+  rejection.
 
 ## Phase-1 idea check (paste text)
 
-A compressor blisk with 24 mistuned blades is accelerated quickly
-(6550→7550 rpm in about 6 s) through a first-bending resonance. The only data
-are raw blade-tip-timing records: once-per-rev time stamps and the trigger
-times from five casing probes. The solver must find the exciting engine order
-(undocumented), plus each blade's resonance frequency, its modal damping
-ratio, and the steady-state resonant tip amplitude a fatigue assessment needs.
+The task is to build a reusable blade-tip-timing analysis program for a
+blisk test facility. Given one run's raw once-per-rev and casing-probe
+trigger times, plus a rig.json of rotor constants, the program must find
+four things:
 
-The core work is real BTT practice:
+- the undocumented engine order;
+- each mistuned blade's resonance frequency;
+- each blade's modal damping;
+- each blade's steady-state resonant tip amplitude, the input to a fatigue
+  assessment.
 
-- turn trigger times into tip deflections;
-- assign pulses to blades despite missed and spurious triggers and a probe
-  that drops out mid-resonance;
-- repair a faulty once-per-rev record (missed and spurious OPR pulses);
-- remove static stagger and probe-angle offsets;
-- run a per-revolution multi-probe synchronous fit and identify the engine
-  order from it;
-- fit a damped single-mode model per blade.
+The program is run on the visible example and on three unseen rotors. Those
+rotors differ in blade count, radius, Southwell coefficient, probe layout,
+engine order, speed range and sweep direction (acceleration or deceleration).
 
-The difficulty is physical, not puzzle-like:
+It needs a complete, robust tip-timing reduction:
 
-1. The mode stiffens centrifugally (Southwell coefficient given). The speed
-   bandwidth then maps to damping through `EO − S/EO`, not `EO`. Ignoring
-   this biases damping by about +13%.
-2. The run-up is fast compared with the blades' decay time (damping
-   0.12–0.35%). The resonance passage is therefore transient: the peak
-   shifts, broadens and rings afterwards. A steady-state fit or half-power
-   method biases frequency by about 0.3% and damping by about +15%. Damping
-   has to come from a transient model driven by the measured speed history.
-   The same effect attenuates the measured peaks (up to about 30% low), so
-   the steady-state resonant amplitude has to be reconstructed from the
-   identified forcing gain and damping.
+- repair the OPR record, which has missed and spurious pulses;
+- assign triggers to blades despite missed and spurious triggers and a probe
+  dropout;
+- zero the static positions;
+- fit the synchronous response across the probes;
+- identify the engine order.
 
-Requirements (stated in the instruction):
+It also needs real physics judgement:
 
-- correct engine order;
-- every blade's frequency within 0.25%;
-- every blade's damping within 25%;
-- damping error averaged over the blades within ±7%;
-- every blade's steady-state resonant amplitude within 15%.
+- Centrifugal stiffening maps speed bandwidth to damping through `EO − S/EO`.
+- The sweeps are fast relative to the blades' decay time, so the resonance
+  passage is transient. Its distortion flips between run-up and run-down,
+  and steady-state fits fail.
+- Measured peaks are attenuated by up to about 34%, so the fatigue amplitude
+  has to be reconstructed from the identified forcing gain and damping.
 
-The reference transient fit lands within 0.05% on frequency, within 11.4% on
-damping per blade (mean within ±2.2%) and within 8.3% on amplitude. This holds
-on the shipped data and on 5 freshly generated datasets.
+The data come from a disclosed, seeded generator, and the ground truth is the
+generator's parameters.
 
 ## Self-review against the posted rejection reasons
 
 | Rejection reason | Status |
 |---|---|
-| Tolerance inside the noise of correct methods | Damping: reference worst blade 11.4% against a 25% limit, mean ±2.2% against ±7%. Amplitude: 8.3% against 15%. Frequency: 0.05% against 0.25%. Checked on 6 datasets. |
+| Tolerance inside the noise of correct methods | Over 16 runs (4 configurations × 4 seeds), the reference's worst blade is 17.7% on damping against a 25% limit and 9.6% on amplitude against 15%. Run means stay within ±1.9% against ±7%. Frequency is within 0.05% against 0.25%. |
 | Accuracy bars not visible to the solver | All four limits are stated in instruction.md. |
 | Unstated conventions | Blade numbering, probe angles and rotation direction, the damping definition (viscous single-mode, fraction of critical), the frequency definition (natural frequency at the crossing speed) and the Southwell law are all stated in the rig sheet and instruction. |
 | Wrong shipped data without a warning | None. Probe-angle tolerance (±0.1°), stagger, missed and spurious triggers, the intermittent probe and the faulty OPR pickup are all disclosed. |
-| Shortcuts that leak the answer | No fitted values ship. The engine order and damping can only come from the probe data. |
+| Shortcuts that leak the answer | No fitted values ship. Held-out runs are unseen, and the truth directory is unreadable to the program under test. |
 | Results don't separate good from bad | Steady-state fit and no-Southwell variants fail on every dataset tried. The transient reference passes on every one. |
 | Puzzle or spec transcription | No. It is a measurement-data inference pipeline, and the method is not prescribed. |
 | Not a scientific result | Modal properties of an engineered structure. |

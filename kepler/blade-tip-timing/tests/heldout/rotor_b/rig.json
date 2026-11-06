@@ -1,0 +1,18 @@
+{
+  "n_blades": 26,
+  "tip_radius_m": 0.262,
+  "southwell_coefficient": 4.8,
+  "probe_angles_deg": [
+    0.0,
+    42.2,
+    92.1,
+    99.8,
+    125.3
+  ],
+  "probe_angle_tolerance_deg": 0.1,
+  "nominal_speed_rpm": {
+    "start": 7600.0,
+    "end": 8800.0
+  },
+  "nominal_duration_s": 7.0
+}

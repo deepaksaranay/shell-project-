@@ -1,0 +1,146 @@
+{
+ "engine_order": 7,
+ "blades": {
+  "1": {
+   "resonance_frequency_Hz": 680.864773091995,
+   "damping_ratio": 0.002999246619645354,
+   "steady_resonant_amplitude_mm": 0.235923692424362,
+   "f0_Hz": 655.3763290517753
+  },
+  "2": {
+   "resonance_frequency_Hz": 679.8160211711047,
+   "damping_ratio": 0.001934586050909178,
+   "steady_resonant_amplitude_mm": 0.42488866414272203,
+   "f0_Hz": 654.366837576871
+  },
+  "3": {
+   "resonance_frequency_Hz": 689.953198919554,
+   "damping_ratio": 0.0028442966291503564,
+   "steady_resonant_amplitude_mm": 0.2465289562253226,
+   "f0_Hz": 664.1245260376108
+  },
+  "4": {
+   "resonance_frequency_Hz": 688.5930303546205,
+   "damping_ratio": 0.0027749469051717894,
+   "steady_resonant_amplitude_mm": 0.22333148888282958,
+   "f0_Hz": 662.8152759248029
+  },
+  "5": {
+   "resonance_frequency_Hz": 693.8703821950105,
+   "damping_ratio": 0.0013604420442162742,
+   "steady_resonant_amplitude_mm": 0.5512183085811392,
+   "f0_Hz": 667.8950679965276
+  },
+  "6": {
+   "resonance_frequency_Hz": 693.3075118324049,
+   "damping_ratio": 0.0015212957935679633,
+   "steady_resonant_amplitude_mm": 0.5515448001794606,
+   "f0_Hz": 667.3532689101961
+  },
+  "7": {
+   "resonance_frequency_Hz": 682.2846806623954,
+   "damping_ratio": 0.0032245091773135054,
+   "steady_resonant_amplitude_mm": 0.24423033178538037,
+   "f0_Hz": 656.7430818165805
+  },
+  "8": {
+   "resonance_frequency_Hz": 686.7232285760249,
+   "damping_ratio": 0.0017676829145302207,
+   "steady_resonant_amplitude_mm": 0.5825357960538132,
+   "f0_Hz": 661.0154709207262
+  },
+  "9": {
+   "resonance_frequency_Hz": 692.7793159451413,
+   "damping_ratio": 0.0020239902064618726,
+   "steady_resonant_amplitude_mm": 0.4742391298279073,
+   "f0_Hz": 666.8448462464079
+  },
+  "10": {
+   "resonance_frequency_Hz": 679.2910233893803,
+   "damping_ratio": 0.0024930062549961903,
+   "steady_resonant_amplitude_mm": 0.3963845952816308,
+   "f0_Hz": 653.8614932962668
+  },
+  "11": {
+   "resonance_frequency_Hz": 688.1367735834027,
+   "damping_ratio": 0.0020590633289749834,
+   "steady_resonant_amplitude_mm": 0.47802833155778446,
+   "f0_Hz": 662.3760993075903
+  },
+  "12": {
+   "resonance_frequency_Hz": 681.3071773297169,
+   "damping_ratio": 0.0023308699300123763,
+   "steady_resonant_amplitude_mm": 0.30341158410164415,
+   "f0_Hz": 655.8021717106024
+  },
+  "13": {
+   "resonance_frequency_Hz": 674.6663953648713,
+   "damping_ratio": 0.0032745258950175613,
+   "steady_resonant_amplitude_mm": 0.2449650942479186,
+   "f0_Hz": 649.4099900643275
+  },
+  "14": {
+   "resonance_frequency_Hz": 695.1015360332235,
+   "damping_ratio": 0.002256608314712422,
+   "steady_resonant_amplitude_mm": 0.3437428522857604,
+   "f0_Hz": 669.08013310031
+  },
+  "15": {
+   "resonance_frequency_Hz": 683.2106579640619,
+   "damping_ratio": 0.0026298844855233237,
+   "steady_resonant_amplitude_mm": 0.323889004588596,
+   "f0_Hz": 657.6343947890456
+  },
+  "16": {
+   "resonance_frequency_Hz": 671.6200264443938,
+   "damping_ratio": 0.003468538867614908,
+   "steady_resonant_amplitude_mm": 0.17724142768929324,
+   "f0_Hz": 646.477663178075
+  },
+  "17": {
+   "resonance_frequency_Hz": 687.309406548323,
+   "damping_ratio": 0.002849513558317411,
+   "steady_resonant_amplitude_mm": 0.27933601402846936,
+   "f0_Hz": 661.5797050870954
+  },
+  "18": {
+   "resonance_frequency_Hz": 686.7058416470039,
+   "damping_ratio": 0.0016444572819193418,
+   "steady_resonant_amplitude_mm": 0.48276526007534576,
+   "f0_Hz": 660.9987348783201
+  },
+  "19": {
+   "resonance_frequency_Hz": 692.3478331248377,
+   "damping_ratio": 0.001337904432186465,
+   "steady_resonant_amplitude_mm": 0.5437644570058463,
+   "f0_Hz": 666.4295161573871
+  },
+  "20": {
+   "resonance_frequency_Hz": 678.4127590147859,
+   "damping_ratio": 0.002892806485362399,
+   "steady_resonant_amplitude_mm": 0.2764077372858467,
+   "f0_Hz": 653.0161070984398
+  },
+  "21": {
+   "resonance_frequency_Hz": 697.0923388939351,
+   "damping_ratio": 0.003373313126536232,
+   "steady_resonant_amplitude_mm": 0.25155152838189504,
+   "f0_Hz": 670.9964094627863
+  },
+  "22": {
+   "resonance_frequency_Hz": 687.7760931268909,
+   "damping_ratio": 0.00337612291114911,
+   "steady_resonant_amplitude_mm": 0.253117871709073,
+   "f0_Hz": 662.0289210676647
+  }
+ },
+ "probe_error_deg": [
+  0.06210544497580593,
+  -0.06864563667867046,
+  0.05039329564065741,
+  0.06329519927285192,
+  -0.0037502851426546857,
+  0.008566099208850597
+ ],
+ "seed": 1101
+}

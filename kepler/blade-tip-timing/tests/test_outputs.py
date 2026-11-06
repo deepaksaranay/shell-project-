@@ -1,81 +1,117 @@
 import json
 import math
+import os
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
 
-OUT = Path("/app/output/blade_modal_results.json")
-EXPECTED = json.loads((Path(__file__).parent / "expected.json").read_text())
-BLADES = [str(i) for i in range(1, 25)]
-F_TOL = 0.0025      # relative, per blade
-Z_TOL = 0.25        # relative, per blade
-Z_MEAN_TOL = 0.07   # mean signed relative damping error over the 24 blades
-A_TOL = 0.15        # relative, per blade (steady-state resonant amplitude)
+PROGRAM = Path("/app/btt_analyze.py")
+HERE = Path(__file__).parent
+# heldout/ holds a copy of the shipped example run plus the unseen runs.
+DATASETS = {d.name: d for d in sorted((HERE / "heldout").iterdir()) if d.is_dir()}
+TRUTH = {n: json.loads((HERE / "truth" / f"{n}.json").read_text()) for n in DATASETS}
+
+RUN_TIMEOUT_S = 600
+F_TOL = 0.0025
+Z_TOL = 0.25
+Z_MEAN_TOL = 0.07
+A_TOL = 0.15
+RUN_AS = int(os.environ.get("BTT_RUN_UID", "65534"))  # nobody
 
 
-def _load():
-    assert OUT.exists(), f"{OUT} not found"
-    out = json.loads(OUT.read_text())
-    assert isinstance(out, dict), "top level must be a JSON object"
-    return out
+def _run(name):
+    """Run the program on one dataset as an unprivileged user; return parsed output."""
+    work = Path(tempfile.mkdtemp(prefix=f"btt_{name}_"))
+    data = work / "data"
+    shutil.copytree(DATASETS[name], data)
+    out = work / "out.json"
+    for p in [work, data, *data.iterdir()]:
+        os.chmod(p, 0o777 if p.is_dir() else 0o644)
+    kw = {}
+    if os.geteuid() == 0:
+        kw = dict(user=RUN_AS, group=RUN_AS, extra_groups=[])
+    proc = subprocess.run(
+        ["python3", str(PROGRAM), str(data), str(out)],
+        cwd=work, capture_output=True, text=True, timeout=RUN_TIMEOUT_S,
+        env={"PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"), "HOME": str(work),
+             "OMP_NUM_THREADS": "2", "OPENBLAS_NUM_THREADS": "2", "MKL_NUM_THREADS": "2"},
+        **kw,
+    )
+    assert proc.returncode == 0, f"{name}: exit {proc.returncode}\n{proc.stderr[-2000:]}"
+    assert out.exists(), f"{name}: no output written"
+    res = json.loads(out.read_text())
+    assert isinstance(res, dict), f"{name}: top level must be an object"
+    return res
 
 
-def _value(out, blade, key):
-    blades = out.get("blades")
-    assert isinstance(blades, dict) and blade in blades, f"blade {blade} missing"
-    entry = blades[blade]
-    assert isinstance(entry, dict) and key in entry, f"blade {blade}: {key} missing"
-    v = entry[key]
-    assert isinstance(v, (int, float)) and not isinstance(v, bool), f"blade {blade}: {key} not a number"
-    v = float(v)
-    assert math.isfinite(v), f"blade {blade}: {key} not finite"
-    return v
+@pytest.fixture(scope="session")
+def results():
+    assert PROGRAM.exists(), f"{PROGRAM} not found"
+    cache = {}
+    for name in DATASETS:
+        try:
+            cache[name] = _run(name)
+        except Exception as e:  # noqa: BLE001 - recorded and reported per dataset
+            cache[name] = e
+    return cache
 
 
-def test_engine_order():
-    out = _load()
-    eo = out.get("engine_order")
-    assert isinstance(eo, int) and not isinstance(eo, bool), "engine_order must be an integer"
-    assert eo == EXPECTED["engine_order"]
+def _get(results, name):
+    r = results[name]
+    if isinstance(r, Exception):
+        pytest.fail(f"{name}: program failed: {r}")
+    return r
 
 
-def test_all_blades_present():
-    out = _load()
-    blades = out.get("blades")
-    assert isinstance(blades, dict), "blades must be an object"
-    missing = [b for b in BLADES if b not in blades]
-    assert not missing, f"missing blades: {missing}"
+def _values(res, truth, key, name):
+    blades = res.get("blades")
+    assert isinstance(blades, dict), f"{name}: blades must be an object"
+    vals = {}
+    for b in truth["blades"]:
+        assert b in blades and isinstance(blades[b], dict), f"{name}: blade {b} missing"
+        v = blades[b].get(key)
+        assert isinstance(v, (int, float)) and not isinstance(v, bool), f"{name}: blade {b} {key} not a number"
+        v = float(v)
+        assert math.isfinite(v) and v > 0, f"{name}: blade {b} {key} not finite/positive"
+        vals[b] = v
+    return vals
 
 
-@pytest.mark.parametrize("blade", BLADES)
-def test_resonance_frequency(blade):
-    out = _load()
-    f = _value(out, blade, "resonance_frequency_Hz")
-    ft = EXPECTED["blades"][blade]["resonance_frequency_Hz"]
-    assert abs(f / ft - 1) <= F_TOL, f"blade {blade}: {f:.3f} Hz"
+@pytest.mark.parametrize("name", list(DATASETS))
+def test_engine_order(results, name):
+    res = _get(results, name)
+    eo = res.get("engine_order")
+    assert isinstance(eo, int) and not isinstance(eo, bool), f"{name}: engine_order must be an integer"
+    assert eo == TRUTH[name]["engine_order"], f"{name}: engine order {eo}"
 
 
-@pytest.mark.parametrize("blade", BLADES)
-def test_damping_ratio(blade):
-    out = _load()
-    z = _value(out, blade, "damping_ratio")
-    zt = EXPECTED["blades"][blade]["damping_ratio"]
-    assert z > 0, f"blade {blade}: damping must be positive"
-    assert abs(z / zt - 1) <= Z_TOL, f"blade {blade}: {z:.5f}"
+@pytest.mark.parametrize("name", list(DATASETS))
+def test_resonance_frequency(results, name):
+    t = TRUTH[name]
+    v = _values(_get(results, name), t, "resonance_frequency_Hz", name)
+    bad = {b: round(v[b] / t["blades"][b]["resonance_frequency_Hz"] - 1, 5) for b in v
+           if abs(v[b] / t["blades"][b]["resonance_frequency_Hz"] - 1) > F_TOL}
+    assert not bad, f"{name}: frequency out of limit for blades {bad}"
 
 
-def test_damping_fleet_bias():
-    out = _load()
-    rel = [_value(out, b, "damping_ratio") / EXPECTED["blades"][b]["damping_ratio"] - 1
-           for b in BLADES]
-    mean = sum(rel) / len(rel)
-    assert abs(mean) <= Z_MEAN_TOL, f"mean relative damping error {mean:+.3f}"
+@pytest.mark.parametrize("name", list(DATASETS))
+def test_damping_ratio(results, name):
+    t = TRUTH[name]
+    v = _values(_get(results, name), t, "damping_ratio", name)
+    rel = {b: v[b] / t["blades"][b]["damping_ratio"] - 1 for b in v}
+    bad = {b: round(r, 3) for b, r in rel.items() if abs(r) > Z_TOL}
+    assert not bad, f"{name}: damping out of limit for blades {bad}"
+    mean = sum(rel.values()) / len(rel)
+    assert abs(mean) <= Z_MEAN_TOL, f"{name}: mean relative damping error {mean:+.3f}"
 
 
-@pytest.mark.parametrize("blade", BLADES)
-def test_steady_resonant_amplitude(blade):
-    out = _load()
-    a = _value(out, blade, "steady_resonant_amplitude_mm")
-    at = EXPECTED["blades"][blade]["steady_resonant_amplitude_mm"]
-    assert a > 0, f"blade {blade}: amplitude must be positive"
-    assert abs(a / at - 1) <= A_TOL, f"blade {blade}: {a:.4f} mm"
+@pytest.mark.parametrize("name", list(DATASETS))
+def test_steady_resonant_amplitude(results, name):
+    t = TRUTH[name]
+    v = _values(_get(results, name), t, "steady_resonant_amplitude_mm", name)
+    bad = {b: round(v[b] / t["blades"][b]["steady_resonant_amplitude_mm"] - 1, 3) for b in v
+           if abs(v[b] / t["blades"][b]["steady_resonant_amplitude_mm"] - 1) > A_TOL}
+    assert not bad, f"{name}: amplitude out of limit for blades {bad}"

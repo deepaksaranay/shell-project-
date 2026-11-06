@@ -33,11 +33,24 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 from scipy.optimize import least_squares
 
+# Rotor/probe geometry, set from the dataset's rig.json by configure().
 B = 24
 R = 0.2475
 S = 4.2
 ALPHA = np.deg2rad([0.0, 14.0, 48.5, 56.5, 153.0])
 NP = len(ALPHA)
+EO_MAX = 30
+
+
+def configure(data):
+    global B, R, S, ALPHA, NP
+    with open(os.path.join(data, "rig.json")) as f:
+        rig = json.load(f)
+    B = int(rig["n_blades"])
+    R = float(rig["tip_radius_m"])
+    S = float(rig["southwell_coefficient"])
+    ALPHA = np.deg2rad(np.asarray(rig["probe_angles_deg"], float))
+    NP = len(ALPHA)
 
 
 def clean_opr(opr):
@@ -168,7 +181,7 @@ def choose_eo(D):
     """EO whose per-revolution fit explains the probe-to-probe scatter best."""
     total = np.nansum(D ** 2, axis=2)
     best = None
-    for eo in range(1, 25):
+    for eo in range(1, EO_MAX + 1):
         Q, res = per_rev_fit(D, eo)
         # weight revolutions by how much they vibrate (resonance region)
         wgt = np.nan_to_num(total)
@@ -284,6 +297,7 @@ def fit_blade_transient(D, Tm, Qc, sp, eo, b, f0_init, z_init, s=S, half=1.6):
 
 
 def analyse(data, use_southwell=True, method="transient"):
+    configure(data)
     opr, toas = load(data)
     D, Om, Tm, sp = deflections(opr, toas)
     D = zero_static(D, Om)
@@ -304,15 +318,18 @@ def analyse(data, use_southwell=True, method="transient"):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--data", default="/app/data")
-    ap.add_argument("--out", default="/app/output/blade_modal_results.json")
+    ap = argparse.ArgumentParser(description="Blade-tip-timing analysis of one run.")
+    ap.add_argument("dataset_dir")
+    ap.add_argument("output_json")
     a = ap.parse_args()
-    res = analyse(a.data)
-    os.makedirs(os.path.dirname(a.out), exist_ok=True)
-    with open(a.out, "w") as f:
+    res = analyse(a.dataset_dir)
+    d = os.path.dirname(os.path.abspath(a.output_json))
+    os.makedirs(d, exist_ok=True)
+    with open(a.output_json, "w") as f:
         json.dump(res, f, indent=2)
 
 
 if __name__ == "__main__":
+    import warnings
+    warnings.filterwarnings("ignore")
     main()
