@@ -64,8 +64,8 @@ damping per blade (mean within ±1.6%). This holds on the shipped data and on
 
 ## Instruction wording (new rules)
 
-- No grader, verifier, scoring or reward language.
-- Headings are `## Output` and `## Requirements`.
+- No grader, verifier, scoring or reward language. Requirements are
+  introduced with a plain "Requirements:" lead-in.
 - `[agent] timeout_sec = 28800` and `[verifier] timeout_sec = 600`.
 - The instruction has no headings and ends with the exact required sentence
   ("You have 28800 seconds...").
