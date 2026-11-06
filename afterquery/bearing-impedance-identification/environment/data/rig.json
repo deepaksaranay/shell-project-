@@ -1,0 +1,17 @@
+{
+  "sample_rate_hz": 10240.0,
+  "record_length_s": 2.0,
+  "rotor_speed_rpm": 6000.0,
+  "stator_mass_kg": 24.6,
+  "tare_stator_mass_kg": 17.9,
+  "notes": "stator_mass_kg applies to the bearing_* tests (stator with bearing insert installed); tare_stator_mass_kg applies to the tare_* tests (bearing insert removed).",
+  "standard_gravity_m_per_s2": 9.80665,
+  "channels": {
+    "force_x_N": "shaker force applied to the stator in +x, newtons",
+    "force_y_N": "shaker force applied to the stator in +y, newtons",
+    "accel_x_g": "absolute stator acceleration in +x, units of g",
+    "accel_y_g": "absolute stator acceleration in +y, units of g",
+    "disp_x_um": "stator-minus-rotor relative displacement in +x from proximity probes, micrometres",
+    "disp_y_um": "stator-minus-rotor relative displacement in +y from proximity probes, micrometres"
+  }
+}
