@@ -51,3 +51,18 @@ errors, as a share of μN:
 | A | B | C | D | E | F | G | H |
 |---|---|---|---|---|---|---|---|
 | 0.48% | 0.90% | 0.71% | 0.85% | 0.90% | 1.81% | 0.93% | 1.13% |
+
+## Independent implementation through the verifier
+
+`authoring/provenance/independent_check.py` solves the steady-state
+equations directly with an active-set method, on a 0.45 mm grid shifted by
+a quarter element. It scored 10/10 passed (reward 1): area +1.51%, peak
+pressure +0.70%. Its force errors, as a share of μN:
+
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| 0.47% | 1.07% | 0.79% | 1.01% | 1.06% | 1.75% | 0.86% | 1.14% |
+
+Cases B, F, G and H stopped at the 3000-iteration cap. They were in a
+small 2-cycle at one stick/slip boundary element, and their forces are
+within the limits shown above.

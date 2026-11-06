@@ -52,7 +52,15 @@ is needed, and so is a grid fine enough for about 1% accuracy.
    is solved by accelerated projected gradient (FISTA). Steps repeat until
    the tractions stop changing.
 
-The run takes about 10–15 minutes.
+Run through the verifier, it scores as follows:
+
+| check | result |
+|---|---|
+| worst creep force | 1.81% of μN (pure-spin case F) |
+| contact area | +1.70% |
+| peak pressure | +1.58% |
+
+The run takes about 11 minutes.
 
 The same scheme is validated in `authoring/provenance/validate_hertz.py`
 against Kalker's tabulated creep coefficients for a circular contact:
@@ -81,8 +89,22 @@ the exact solution computed with `authoring/provenance/problem.py` at
 element sizes of 0.5 mm and 0.35 mm, then Richardson-extrapolated (first
 order in element size). The reference solution doesn't produce these values.
 
+**Independent implementation.** `authoring/provenance/independent_check.py`
+uses a different tangential algorithm: it solves the steady-state equations
+s = w + Kq directly, with an active-set method. It runs on a 0.45 mm grid
+shifted by a quarter element. Through the verifier it passes all 10 checks:
+
+| check | result |
+|---|---|
+| worst creep force | 1.75% of μN |
+| contact area | +1.51% |
+| peak pressure | +0.70% |
+
+Its output is in `authoring/evidence/independent_output.json`.
+
 **How the limits were set.** The worst force errors against the
-extrapolated reference are 1.6% of μN at 0.5 mm and 1.1% at 0.35 mm, so
-correct converged methods pass. The Hertz-ellipse shortcut fails the area
-and pressure limits and several force cases. The 1 mm grid and linear theory
+extrapolated reference are 1.6% of μN at 0.5 mm and 1.1% at 0.35 mm on the
+generator's own grids. The shipped solution is at 1.81% and the independent
+implementation at 1.75%. The Hertz-ellipse shortcut fails the area and
+pressure limits and several force cases. The 1 mm grid and linear theory
 fail the force limits.
