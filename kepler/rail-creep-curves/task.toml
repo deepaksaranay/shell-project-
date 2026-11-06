@@ -1,0 +1,45 @@
+schema_version = "1.4"
+
+artifacts = ["/app/output/creep_forces.json"]
+
+[task]
+name = "afterquery/rail-creep-curves"
+description = "Compute exact (Kalker half-space) wheel-rail creep forces, contact area and peak pressure for a worn wheel / rail profile pair over eight longitudinal, lateral and spin creepage cases."
+authors = [{ name = "Deepak Kumar", email = "deepakkumar.dar@gmail.com" }]
+keywords = ["wheel-rail contact", "rolling contact", "Kalker exact theory", "creep forces", "boundary element method", "non-Hertzian contact"]
+
+[metadata]
+author_name = "Deepak Kumar"
+author_email = "deepakkumar.dar@gmail.com"
+author_organization = "Independent Researcher"
+author_profile = "https://github.com/deepaksaranay"
+conflicts_of_interest = "None"
+domain = "engineering-sciences"
+field = "mechanical-engineering"
+subfield = "railway vehicle dynamics: wheel-rail rolling contact mechanics"
+category = "Science"
+subcategory = "Mechanical & Aerospace Engineering"
+tags = ["rolling-contact", "wheel-rail", "creep-forces", "contact-mechanics", "boundary-element-method", "tribology"]
+expert_time_estimate_hours = 12
+relevant_experience = "Mechanical engineer with a fluid-mechanics and solid-mechanics computation background; author of previously accepted engineering-computation benchmark tasks. For this task I implemented and validated a half-space boundary-element rolling-contact solver (normal active-set problem, steady-rolling tangential problem via Kalker's transient scheme) against Kalker's tabulated creep coefficients."
+difficulty_explanation = "Synthetic but realistic profiles (rail crown of R300/R80 arcs, hollow-worn wheel tread with a concave R360 band and a shallow wear groove) give a nearly conformal, non-elliptic contact patch (about 206 mm2, 22 x 11 mm, flat-topped asymmetric pressure peaking near 816 MPa). Standard shortcuts fail: a Hertz ellipse from local curvature misses the area by 11.6% and the peak pressure by 10% (force errors up to 3.6% of mu*N), Kalker's linear theory without a slip region is off by up to 45% of mu*N, and the exact method on a 1 mm grid misses forces by up to 3.7%. The agent must implement and converge Kalker's exact theory: gap from the two profiles, half-space normal problem, and the steady-rolling tangential problem with stick/slip, lateral-spin coupling and the transport derivative. Naive Gauss-Seidel on the steady equations diverges (spectral radius 20-100), so a robust formulation is required."
+solution_explanation = "Build the undeformed separation from the profiles plus the wheel's longitudinal curvature; solve the normal problem on 0.4 mm elements with closed-form Boussinesq rectangle influence numbers and an active-set method with the load constraint; obtain steady rolling as the fixed point of Kalker's transient scheme with a one-element rolling step, each step being the convex problem min 1/2 q'Uq + q'(w dx - u_prev) subject to |q| <= mu p with the symmetric Cerruti influence matrix U, solved by accelerated projected gradient (FISTA); sum the tractions. The scheme reproduces Kalker's tabulated creep coefficients for a circular contact within about 1.5%."
+verification_explanation = "The tests read /app/output/creep_forces.json and require every case's creep-force vector within 2.5% of mu*N (962 N) of the reference, the contact area within 4% and the peak pressure within 5%, with numeric, finite values and each case present once. The reference (tests/reference_solution.json) is the exact solution computed separately at element sizes 0.5 mm and 0.35 mm and Richardson-extrapolated; it is not produced by the reference solution. Correct converged methods pass (worst force error 1.6% of mu*N at 0.5 mm, 1.1% at 0.35 mm); the Hertz-ellipse shortcut fails the area and pressure limits and several force cases, and a 1 mm grid and linear theory fail the force limits."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[verifier.environment]
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 28800.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 4
+memory_mb = 8192
+storage_mb = 10240
+gpus = 0
+network_mode = "public"

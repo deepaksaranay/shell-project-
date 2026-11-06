@@ -1,0 +1,114 @@
+{
+ "mu": 0.35,
+ "normal_load_N": 110000.0,
+ "contact_area_mm2": 206.09,
+ "max_pressure_MPa": 815.6,
+ "area_el0.5": 208.99999999999997,
+ "area_el0.35": 208.12832418742087,
+ "pmax_el0.5": 827.8828224560128,
+ "pmax_el0.35": 824.1960622533264,
+ "cases": [
+  {
+   "id": "A",
+   "xi": 0.0005,
+   "eta": 0.0,
+   "phi_per_m": 0.0,
+   "Fx_N": -9489.1,
+   "Fy_N": -1.7,
+   "Fx_N_el0.35": -9658.0,
+   "Fy_N_el0.35": 4.2,
+   "Fx_N_el0.5": -9730.3,
+   "Fy_N_el0.5": 6.7
+  },
+  {
+   "id": "B",
+   "xi": 0.002,
+   "eta": 0.0,
+   "phi_per_m": 0.0,
+   "Fx_N": -29283.0,
+   "Fy_N": -23.6,
+   "Fx_N_el0.35": -29669.3,
+   "Fy_N_el0.35": -30.6,
+   "Fx_N_el0.5": -29834.8,
+   "Fy_N_el0.5": -33.6
+  },
+  {
+   "id": "C",
+   "xi": 0.0,
+   "eta": 0.001,
+   "phi_per_m": 0.0,
+   "Fx_N": -25.4,
+   "Fy_N": -14532.3,
+   "Fx_N_el0.35": -22.8,
+   "Fy_N_el0.35": -14807.1,
+   "Fx_N_el0.5": -21.7,
+   "Fy_N_el0.5": -14924.8
+  },
+  {
+   "id": "D",
+   "xi": 0.0,
+   "eta": 0.003,
+   "phi_per_m": 0.0,
+   "Fx_N": -80.5,
+   "Fy_N": -32430.9,
+   "Fx_N_el0.35": -90.6,
+   "Fy_N_el0.35": -32813.0,
+   "Fx_N_el0.5": -95.0,
+   "Fy_N_el0.5": -32976.8
+  },
+  {
+   "id": "E",
+   "xi": 0.001,
+   "eta": 0.001,
+   "phi_per_m": 0.0,
+   "Fx_N": -16492.5,
+   "Fy_N": -13544.1,
+   "Fx_N_el0.35": -16779.6,
+   "Fy_N_el0.35": -13766.2,
+   "Fx_N_el0.5": -16902.7,
+   "Fy_N_el0.5": -13861.3
+  },
+  {
+   "id": "F",
+   "xi": 0.0,
+   "eta": 0.0,
+   "phi_per_m": 0.5,
+   "Fx_N": -7649.3,
+   "Fy_N": -15029.6,
+   "Fx_N_el0.35": -7663.6,
+   "Fy_N_el0.35": -14602.4,
+   "Fx_N_el0.5": -7669.7,
+   "Fy_N_el0.5": -14419.3
+  },
+  {
+   "id": "G",
+   "xi": 0.001,
+   "eta": 0.0005,
+   "phi_per_m": 0.3,
+   "Fx_N": -16872.2,
+   "Fy_N": -16243.9,
+   "Fx_N_el0.35": -16912.9,
+   "Fy_N_el0.35": -16056.7,
+   "Fx_N_el0.5": -16930.3,
+   "Fy_N_el0.5": -15976.4
+  },
+  {
+   "id": "H",
+   "xi": -0.0015,
+   "eta": 0.0,
+   "phi_per_m": -0.6,
+   "Fx_N": 17221.3,
+   "Fy_N": 14648.4,
+   "Fx_N_el0.35": 17330.9,
+   "Fy_N_el0.35": 14351.5,
+   "Fx_N_el0.5": 17377.8,
+   "Fy_N_el0.5": 14224.3
+  }
+ ],
+ "tolerances": {
+  "force_fraction_of_mu_N": null,
+  "area_relative": null,
+  "max_pressure_relative": null
+ },
+ "note": "Kalker exact steady rolling on a half-space; element sizes 0.5 and 0.35 mm, Richardson-extrapolated (first order in element size)."
+}

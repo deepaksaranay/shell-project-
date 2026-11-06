@@ -2,7 +2,8 @@
 
 | task | bundle | upload zip | generator (not in bundle) |
 |---|---|---|---|
-| surge-vessel-sizing (current) | `surge-vessel-sizing/` | `surge-vessel-sizing.zip` | `surge-vessel-sizing/authoring/provenance/` |
+| rail-creep-curves (current) | `rail-creep-curves/` | `rail-creep-curves.zip` | `rail-creep-curves/authoring/provenance/` |
+| surge-vessel-sizing (failed similarity) | `surge-vessel-sizing/` | `surge-vessel-sizing.zip` | `surge-vessel-sizing/authoring/provenance/` |
 | blade-tip-timing (failed similarity) | `blade-tip-timing/` | `blade-tip-timing.zip` | `blade-tip-timing/authoring/provenance/` |
 | bearing-impedance-identification (earlier draft) | `bearing-impedance-identification/` | `bearing-impedance-identification.zip` | `generator/` |
 

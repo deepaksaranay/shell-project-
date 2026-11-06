@@ -1,0 +1,64 @@
+{
+ "element_mm": 0.5,
+ "area_mm2": 208.99999999999997,
+ "p_max_MPa": 827.8828224560128,
+ "approach_um": 83.7602405786914,
+ "cases": {
+  "A": {
+   "Fx_N": -9730.312840047509,
+   "Fy_N": 6.689340326122023,
+   "adhesion_fraction": 0.868421052631579,
+   "steps": 337,
+   "converged": true
+  },
+  "B": {
+   "Fx_N": -29834.825415823398,
+   "Fy_N": -33.562172594671324,
+   "adhesion_fraction": 0.4533492822966507,
+   "steps": 255,
+   "converged": true
+  },
+  "C": {
+   "Fx_N": -21.735008133061427,
+   "Fy_N": -14924.849042985914,
+   "adhesion_fraction": 0.7811004784688995,
+   "steps": 263,
+   "converged": true
+  },
+  "D": {
+   "Fx_N": -94.96468747501558,
+   "Fy_N": -32976.811723833474,
+   "adhesion_fraction": 0.35645933014354064,
+   "steps": 208,
+   "converged": true
+  },
+  "E": {
+   "Fx_N": -16902.656493133254,
+   "Fy_N": -13861.325547968412,
+   "adhesion_fraction": 0.6495215311004785,
+   "steps": 304,
+   "converged": true
+  },
+  "F": {
+   "Fx_N": -7669.708440813754,
+   "Fy_N": -14419.254722518584,
+   "adhesion_fraction": 0.25239234449760767,
+   "steps": 240,
+   "converged": true
+  },
+  "G": {
+   "Fx_N": -16930.32165379108,
+   "Fy_N": -15976.415288156622,
+   "adhesion_fraction": 0.3923444976076555,
+   "steps": 258,
+   "converged": true
+  },
+  "H": {
+   "Fx_N": 17377.834275712346,
+   "Fy_N": 14224.250886180118,
+   "adhesion_fraction": 0.13277511961722488,
+   "steps": 213,
+   "converged": true
+  }
+ }
+}
