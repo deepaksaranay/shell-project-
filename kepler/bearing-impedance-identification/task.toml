@@ -1,0 +1,27 @@
+version = "1.0"
+
+[task]
+name = "afterquery/bearing-impedance-identification"
+domain = "engineering-sciences"
+field = "mechanical-aerospace-engineering"
+subfield = "rotordynamics: fluid-film bearing coefficient identification"
+
+[metadata]
+author_name = "Deepak Kumar"
+author_email = "deepakkumar.dar@gmail.com"
+difficulty = "hard"
+category = "scientific-computing"
+tags = ["rotordynamics", "journal-bearing", "system-identification", "signal-processing", "vibration-testing"]
+
+[verifier]
+timeout_sec = 900
+
+[agent]
+timeout_sec = 28800
+
+[environment]
+build_timeout_sec = 900
+cpus = 2
+memory_mb = 4096
+storage_mb = 4096
+gpus = 0

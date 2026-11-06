@@ -1,0 +1,9 @@
+condition,nominal_speed_rpm,static_load_N,x_shaker_file,y_shaker_file
+C01,4100,1000,C01_x.csv,C01_y.csv
+C02,6250,1000,C02_x.csv,C02_y.csv
+C03,8300,1000,C03_x.csv,C03_y.csv
+C04,10450,1000,C04_x.csv,C04_y.csv
+C05,4100,3000,C05_x.csv,C05_y.csv
+C06,6250,3000,C06_x.csv,C06_y.csv
+C07,8300,3000,C07_x.csv,C07_y.csv
+C08,10450,3000,C08_x.csv,C08_y.csv
