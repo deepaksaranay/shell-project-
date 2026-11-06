@@ -1,9 +1,10 @@
+# Run from the bundle root.
 # Alternative correct method: half-power bandwidth on smoothed |Q - c|, with the
 # Southwell detuning-rate correction  zeta = (EO - S/EO) dOmega / (2 EO Omega_res).
 import sys, json, numpy as np
-sys.path.insert(0, "blade-tip-timing/solution"); import solve as S
-T = json.load(open("blade-tip-timing/tests/expected.json"))
-opr, toas = S.load("blade-tip-timing/environment/data")
+sys.path.insert(0, "solution"); import solve as S
+T = json.load(open("tests/expected.json"))
+opr, toas = S.load("environment/data")
 D, Om = S.deflections(opr, toas); D = S.zero_static(D, Om)
 eo, Q = S.choose_eo(D); Q = S.clean_Q(Q)
 ez, ef = [], []

@@ -1,6 +1,7 @@
+# Run from the bundle root.
 import json, sys, time, numpy as np
-sys.path.insert(0, "blade-tip-timing/solution"); import solve as S
-data = sys.argv[1] if len(sys.argv) > 1 else "blade-tip-timing"
+sys.path.insert(0, "solution"); import solve as S
+data = sys.argv[1] if len(sys.argv) > 1 else "."
 truth = json.load(open(f"{data}/tests/expected.json"))
 def score(out, tag):
     ef = [abs(out["blades"][k]["resonance_frequency_Hz"]/v["resonance_frequency_Hz"]-1) for k,v in truth["blades"].items()]

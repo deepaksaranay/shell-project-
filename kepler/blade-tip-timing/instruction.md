@@ -19,8 +19,6 @@ From these recordings, find:
 3. for each of the 24 blades, its modal damping ratio, as a fraction of
    critical damping for an equivalent viscous single-degree-of-freedom mode.
 
-## Output
-
 Write `/app/output/blade_modal_results.json`:
 
 ```json
@@ -37,7 +35,7 @@ Write `/app/output/blade_modal_results.json`:
 
 Blade keys are the blade numbers `"1"` to `"24"`, as defined in the rig sheet.
 
-## Requirements
+Requirements:
 
 - `engine_order` must be the correct integer.
 - Every blade's `resonance_frequency_Hz` must be within 0.25% of its true value.
@@ -48,4 +46,4 @@ Blade keys are the blade numbers `"1"` to `"24"`, as defined in the rig sheet.
 
 Python 3 with numpy, scipy and pandas is available.
 
-You have 8 hours to complete this task.
+You have 28800 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.

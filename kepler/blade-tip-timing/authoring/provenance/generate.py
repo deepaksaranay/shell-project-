@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Generate shipped data + sealed truth for the blade-tip-timing task.
 
-NOT part of the bundle. Run: python3 kepler/generator_btt/generate.py
+Lives in authoring/ (never mounted). Run from the bundle root:
+    python3 authoring/provenance/generate.py
+Env overrides: BTT_SEED (default 7710), BTT_ROOT (output bundle root).
 
 Each blade i is an uncoupled SDOF oscillator (tip, circumferential):
     x'' + 2 z_i wn_i(t) x' + wn_i(t)^2 x = wn_i(t)^2 * a_i * cos(EO*Phi(t) - EO*2pi(i-1)/B + psi)
@@ -14,10 +16,10 @@ import os
 
 import numpy as np
 
-ROOT = os.path.join(os.path.dirname(__file__), "..", "blade-tip-timing")
+ROOT = os.environ.get("BTT_ROOT", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 DATA = os.path.join(ROOT, "environment", "data")
 TESTS = os.path.join(ROOT, "tests")
-rng = np.random.default_rng(7710)
+rng = np.random.default_rng(int(os.environ.get("BTT_SEED", "7710")))
 
 B = 24
 R = 0.2475               # tip radius, m
@@ -46,6 +48,7 @@ def speed_hz(t):
 
 def main():
     os.makedirs(DATA, exist_ok=True)
+    os.makedirs(TESTS, exist_ok=True)
     nt = int(TDUR / DT) + 1
     t = np.arange(nt) * DT
     Om = speed_hz(t)

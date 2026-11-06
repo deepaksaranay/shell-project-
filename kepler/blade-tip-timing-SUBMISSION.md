@@ -6,7 +6,8 @@
 - **Field:** Mechanical & Aerospace Engineering
 - **GPU:** No (CPU only)
 - **Task name:** `blade-tip-timing`
-- **Bundle:** `kepler/blade-tip-timing.zip`
+- **Bundle:** `kepler/blade-tip-timing.zip`. It contains task.toml,
+  instruction.md, README.md, environment/, solution/, tests/ and authoring/.
 
 ## Phase-1 idea check (paste text)
 
@@ -65,14 +66,18 @@ damping per blade (mean within ±1.6%). This holds on the shipped data and on
 
 - No grader, verifier, scoring or reward language.
 - Headings are `## Output` and `## Requirements`.
-- `[agent] timeout_sec = 28800` and `[verifier] timeout_sec = 900`.
-- The last line of the instruction states the 8-hour limit.
+- `[agent] timeout_sec = 28800` and `[verifier] timeout_sec = 600`.
+- The instruction has no headings and ends with the exact required sentence
+  ("You have 28800 seconds...").
 
 ## Still to confirm before upload
 
-- The `domain` and `field` slugs in task.toml (`engineering-sciences`,
-  `mechanical-aerospace-engineering`) must match the form.
-- The required-layout line on the form was cut off at `tests/Do…`. If it
-  names an extra file, it needs adding.
-- The Docker build has not been run. The solution was run with the
-  Dockerfile's pinned package versions in a local virtualenv.
+1. **Personal details in task.toml.** Three fields are still `TODO`:
+   `author_organization`, `author_profile` and `relevant_experience`.
+   Placeholders fail the author-facts check.
+2. **instruction.md wording.** It must be in your own words: the platform
+   screens instructions for AI-generated text and rejects flagged ones. Keep
+   every fact, path, number and tolerance. Use no Markdown headings. Keep the
+   exact closing sentence.
+3. **Local harbor run.** If you can, run harbor locally (oracle, nop and
+   `harbor check`). Docker was not available where this bundle was built.
