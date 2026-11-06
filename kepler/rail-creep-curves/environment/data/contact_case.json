@@ -1,0 +1,76 @@
+{
+  "materials": {
+    "wheel": {
+      "youngs_modulus_Pa": 210000000000.0,
+      "poisson_ratio": 0.28
+    },
+    "rail": {
+      "youngs_modulus_Pa": 210000000000.0,
+      "poisson_ratio": 0.28
+    }
+  },
+  "normal_load_N": 110000.0,
+  "coefficient_of_friction": 0.35,
+  "wheel_rolling_radius_mm": 460.0,
+  "rail_longitudinal_radius": "infinite (straight rail)",
+  "profiles": {
+    "rail_profile.csv": "rail head surface height z (mm, upward) versus lateral coordinate y (mm)",
+    "wheel_profile.csv": "wheel tread surface height z (mm, upward) versus the same lateral coordinate y (mm), in the measured relative position, at the wheel's lowest point (the section through the wheel axis)",
+    "frame": "both profiles are in one track-fixed frame; the undeformed vertical separation at lateral position y is wheel z minus rail z, up to a constant (the bodies are pressed together by the normal load); contact is close to horizontal, so treat it as planar"
+  },
+  "kinematics": {
+    "rolling_direction": "the wheel rolls in +x; material passes through the contact from +x (leading edge) to -x (trailing edge)",
+    "creepages": "xi (longitudinal) and eta (lateral) are dimensionless rigid slip velocities of the wheel relative to the rail divided by the rolling speed; phi is the spin creepage (rad/m). Rigid slip of a wheel point at (x, y) relative to the rail: (xi - phi*y, eta + phi*x)",
+    "forces": "Fx, Fy: total tangential force exerted BY THE RAIL ON THE WHEEL, in N, positive in +x / +y"
+  },
+  "creepage_cases": [
+    {
+      "id": "A",
+      "xi": 0.0005,
+      "eta": 0.0,
+      "phi_per_m": 0.0
+    },
+    {
+      "id": "B",
+      "xi": 0.002,
+      "eta": 0.0,
+      "phi_per_m": 0.0
+    },
+    {
+      "id": "C",
+      "xi": 0.0,
+      "eta": 0.001,
+      "phi_per_m": 0.0
+    },
+    {
+      "id": "D",
+      "xi": 0.0,
+      "eta": 0.003,
+      "phi_per_m": 0.0
+    },
+    {
+      "id": "E",
+      "xi": 0.001,
+      "eta": 0.001,
+      "phi_per_m": 0.0
+    },
+    {
+      "id": "F",
+      "xi": 0.0,
+      "eta": 0.0,
+      "phi_per_m": 0.5
+    },
+    {
+      "id": "G",
+      "xi": 0.001,
+      "eta": 0.0005,
+      "phi_per_m": 0.3
+    },
+    {
+      "id": "H",
+      "xi": -0.0015,
+      "eta": 0.0,
+      "phi_per_m": -0.6
+    }
+  ]
+}
