@@ -30,7 +30,10 @@ damping is low, typical of integrally bladed rotors.
 ## Sensors
 
 - **Once-per-revolution (OPR) sensor:** `opr.csv` holds one time stamp per
-  revolution, in seconds.
+  revolution, in seconds. The OPR pickup was marginal in this build. It
+  missed a few revolutions and triggered spuriously a few times between
+  revolutions, so the file is the raw trigger list, not a clean
+  one-per-revolution record.
 - **Five optical tip-timing probes** are mounted in the casing. Their angular
   positions are measured in the direction of rotation from probe 1:
 

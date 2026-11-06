@@ -10,6 +10,7 @@ BLADES = [str(i) for i in range(1, 25)]
 F_TOL = 0.0025      # relative, per blade
 Z_TOL = 0.25        # relative, per blade
 Z_MEAN_TOL = 0.07   # mean signed relative damping error over the 24 blades
+A_TOL = 0.15        # relative, per blade (steady-state resonant amplitude)
 
 
 def _load():
@@ -69,3 +70,12 @@ def test_damping_fleet_bias():
            for b in BLADES]
     mean = sum(rel) / len(rel)
     assert abs(mean) <= Z_MEAN_TOL, f"mean relative damping error {mean:+.3f}"
+
+
+@pytest.mark.parametrize("blade", BLADES)
+def test_steady_resonant_amplitude(blade):
+    out = _load()
+    a = _value(out, blade, "steady_resonant_amplitude_mm")
+    at = EXPECTED["blades"][blade]["steady_resonant_amplitude_mm"]
+    assert a > 0, f"blade {blade}: amplitude must be positive"
+    assert abs(a / at - 1) <= A_TOL, f"blade {blade}: {a:.4f} mm"

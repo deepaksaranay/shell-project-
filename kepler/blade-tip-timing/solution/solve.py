@@ -40,8 +40,44 @@ ALPHA = np.deg2rad([0.0, 14.0, 48.5, 56.5, 153.0])
 NP = len(ALPHA)
 
 
+def clean_opr(opr):
+    """Repair the once-per-rev record: drop spurious mid-revolution triggers
+    and fill missed pulses, judged against the local median period."""
+    opr = np.asarray(opr, float)
+    for _ in range(5):
+        d = np.diff(opr)
+        med = np.array([np.median(d[max(0, i - 10):i + 11]) for i in range(len(d))])
+        short = np.where(d < 0.7 * med)[0]
+        if len(short):
+            drop = set()
+            for i in short:
+                # remove whichever end of the short interval leaves the period
+                # closest to normal
+                cand = []
+                if i + 2 < len(opr):
+                    cand.append((abs(opr[i + 2] - opr[i] - med[i]), i + 1))
+                if i >= 1:
+                    cand.append((abs(opr[i + 1] - opr[i - 1] - med[i]), i))
+                if cand:
+                    err, j = min(cand)
+                    if err < 0.15 * med[i]:
+                        drop.add(j)
+            opr = np.delete(opr, sorted(drop))
+            continue
+        long_ = np.where(d > 1.5 * med)[0]
+        if len(long_):
+            ins = []
+            for i in long_:
+                k = int(round(d[i] / med[i]))
+                ins += list(opr[i] + d[i] * np.arange(1, k) / k)
+            opr = np.sort(np.concatenate([opr, ins]))
+            continue
+        break
+    return opr
+
+
 def load(data):
-    opr = np.loadtxt(os.path.join(data, "opr.csv"), skiprows=1)
+    opr = clean_opr(np.loadtxt(os.path.join(data, "opr.csv"), skiprows=1))
     toas = [np.loadtxt(os.path.join(data, f"probe_{p}.csv"), skiprows=1) for p in range(1, NP + 1)]
     return opr, toas
 
@@ -240,7 +276,11 @@ def fit_blade_transient(D, Tm, Qc, sp, eo, b, f0_init, z_init, s=S, half=1.6):
         keep = np.abs(r) < 5 * sig
     sol = least_squares(resid, p0, x_scale=[0.05, 0.02])
     f0, z = sol.x[0], float(np.exp(sol.x[1]))
-    return eo * f0 / np.sqrt(eo**2 - s), z
+    coef, *_ = np.linalg.lstsq(design(sol.x)[keep], y[keep], rcond=None)
+    gain = np.hypot(coef[0], coef[1])  # static-equivalent forcing deflection, m
+    # dwelling at resonance (w = wn): |u| = 1 / (2 zeta)
+    amp_mm = gain / (2 * z) * 1e3
+    return eo * f0 / np.sqrt(eo**2 - s), z, amp_mm
 
 
 def analyse(data, use_southwell=True, method="transient"):
@@ -253,10 +293,13 @@ def analyse(data, use_southwell=True, method="transient"):
     out = {"engine_order": int(eo), "blades": {}}
     for b in range(B):
         fres, z = fit_blade(Om, Q[:, b], eo, use_southwell)
+        sm = np.convolve(np.nan_to_num(np.abs(Q[:, b])), np.ones(9) / 9, "same")
+        amp_mm = float(sm.max() * 1e3)  # measured (transient) peak
         if method == "transient":
             f0 = fres * np.sqrt(eo**2 - s) / eo
-            fres, z = fit_blade_transient(D, Tm, Q, sp, eo, b, f0, z, s)
-        out["blades"][str(b + 1)] = {"resonance_frequency_Hz": float(fres), "damping_ratio": float(z)}
+            fres, z, amp_mm = fit_blade_transient(D, Tm, Q, sp, eo, b, f0, z, s)
+        out["blades"][str(b + 1)] = {"resonance_frequency_Hz": float(fres), "damping_ratio": float(z),
+                                     "steady_resonant_amplitude_mm": float(amp_mm)}
     return out
 
 

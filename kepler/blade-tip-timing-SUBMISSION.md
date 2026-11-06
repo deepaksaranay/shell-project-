@@ -15,13 +15,15 @@ A compressor blisk with 24 mistuned blades is accelerated quickly
 (6550→7550 rpm in about 6 s) through a first-bending resonance. The only data
 are raw blade-tip-timing records: once-per-rev time stamps and the trigger
 times from five casing probes. The solver must find the exciting engine order
-(undocumented), plus each blade's resonance frequency and modal damping ratio.
+(undocumented), plus each blade's resonance frequency, its modal damping
+ratio, and the steady-state resonant tip amplitude a fatigue assessment needs.
 
 The core work is real BTT practice:
 
 - turn trigger times into tip deflections;
 - assign pulses to blades despite missed and spurious triggers and a probe
   that drops out mid-resonance;
+- repair a faulty once-per-rev record (missed and spurious OPR pulses);
 - remove static stagger and probe-angle offsets;
 - run a per-revolution multi-probe synchronous fit and identify the engine
   order from it;
@@ -37,26 +39,30 @@ The difficulty is physical, not puzzle-like:
    shifts, broadens and rings afterwards. A steady-state fit or half-power
    method biases frequency by about 0.3% and damping by about +15%. Damping
    has to come from a transient model driven by the measured speed history.
+   The same effect attenuates the measured peaks (up to about 30% low), so
+   the steady-state resonant amplitude has to be reconstructed from the
+   identified forcing gain and damping.
 
 Requirements (stated in the instruction):
 
 - correct engine order;
 - every blade's frequency within 0.25%;
 - every blade's damping within 25%;
-- damping error averaged over the blades within ±7%.
+- damping error averaged over the blades within ±7%;
+- every blade's steady-state resonant amplitude within 15%.
 
-The reference transient fit lands within 0.04% on frequency and within 9% on
-damping per blade (mean within ±1.6%). This holds on the shipped data and on
-3 freshly generated datasets.
+The reference transient fit lands within 0.05% on frequency, within 11.4% on
+damping per blade (mean within ±2.2%) and within 8.3% on amplitude. This holds
+on the shipped data and on 5 freshly generated datasets.
 
 ## Self-review against the posted rejection reasons
 
 | Rejection reason | Status |
 |---|---|
-| Tolerance inside the noise of correct methods | Reference worst blade 7–9% against a 25% limit. Mean ±1.6% against ±7%. Frequency 0.04% against 0.25%. Checked on 4 datasets. |
+| Tolerance inside the noise of correct methods | Damping: reference worst blade 11.4% against a 25% limit, mean ±2.2% against ±7%. Amplitude: 8.3% against 15%. Frequency: 0.05% against 0.25%. Checked on 6 datasets. |
 | Accuracy bars not visible to the solver | All four limits are stated in instruction.md. |
 | Unstated conventions | Blade numbering, probe angles and rotation direction, the damping definition (viscous single-mode, fraction of critical), the frequency definition (natural frequency at the crossing speed) and the Southwell law are all stated in the rig sheet and instruction. |
-| Wrong shipped data without a warning | None. Probe-angle tolerance (±0.1°), stagger, missed and spurious triggers, and the intermittent probe are all disclosed. |
+| Wrong shipped data without a warning | None. Probe-angle tolerance (±0.1°), stagger, missed and spurious triggers, the intermittent probe and the faulty OPR pickup are all disclosed. |
 | Shortcuts that leak the answer | No fitted values ship. The engine order and damping can only come from the probe data. |
 | Results don't separate good from bad | Steady-state fit and no-Southwell variants fail on every dataset tried. The transient reference passes on every one. |
 | Puzzle or spec transcription | No. It is a measurement-data inference pipeline, and the method is not prescribed. |

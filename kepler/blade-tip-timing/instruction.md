@@ -17,7 +17,11 @@ From these recordings, find:
 2. for each of the 24 blades, the natural frequency of its first bending
    mode at the speed where that blade crosses resonance, in Hz;
 3. for each of the 24 blades, its modal damping ratio, as a fraction of
-   critical damping for an equivalent viscous single-degree-of-freedom mode.
+   critical damping for an equivalent viscous single-degree-of-freedom mode;
+4. for each of the 24 blades, the steady-state resonant tip amplitude, in mm
+   (zero-to-peak, circumferential). This is the amplitude the blade would
+   settle at if the rotor were held at that blade's resonance speed under
+   the same excitation, and it is the input to the fatigue assessment.
 
 Write `/app/output/blade_modal_results.json`:
 
@@ -25,10 +29,10 @@ Write `/app/output/blade_modal_results.json`:
 {
   "engine_order": 0,
   "blades": {
-    "1":  {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0},
-    "2":  {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0},
+    "1":  {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0, "steady_resonant_amplitude_mm": 0.0},
+    "2":  {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0, "steady_resonant_amplitude_mm": 0.0},
     "...": {},
-    "24": {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0}
+    "24": {"resonance_frequency_Hz": 0.0, "damping_ratio": 0.0, "steady_resonant_amplitude_mm": 0.0}
   }
 }
 ```
@@ -42,6 +46,8 @@ Requirements:
 - Every blade's `damping_ratio` must be within 25% (relative) of its true value.
 - The signed relative damping error `(estimate − true) / true`, averaged over
   the 24 blades, must lie between −7% and +7%.
+- Every blade's `steady_resonant_amplitude_mm` must be within 15% (relative)
+  of its true value.
 - All of these must hold together.
 
 Python 3 with numpy, scipy and pandas is available.

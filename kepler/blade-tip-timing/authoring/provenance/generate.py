@@ -82,6 +82,14 @@ def main():
     n_rev = int(np.floor((Phi[-1] - 0.05) / (2 * np.pi)))
     opr_t = np.interp(2 * np.pi * np.arange(1, n_rev + 1), Phi, t)
     opr_t += JIT_OPR * rng.standard_normal(len(opr_t))
+    # OPR faults (separate stream so the blade data are unchanged by them):
+    # a few missed pulses and a few spurious mid-revolution triggers.
+    rng_opr = np.random.default_rng(int(os.environ.get("BTT_SEED", "7710")) + 1)
+    n = len(opr_t)
+    drop = rng_opr.choice(np.arange(10, n - 10), 4, replace=False)
+    spur_i = rng_opr.choice(np.setdiff1d(np.arange(10, n - 10), np.concatenate([drop, drop - 1])), 3, replace=False)
+    spur = opr_t[spur_i] + rng_opr.uniform(0.2, 0.8, 3) * (opr_t[spur_i + 1] - opr_t[spur_i])
+    opr_t = np.sort(np.concatenate([np.delete(opr_t, drop), spur]))
     np.savetxt(os.path.join(DATA, "opr.csv"), opr_t, fmt="%.9f", header="opr_time_s", comments="")
 
     def hermite(i, tq):
@@ -127,6 +135,7 @@ def main():
     truth = {"engine_order": EO,
              "blades": {str(i + 1): {"resonance_frequency_Hz": float(fres[i]),
                                       "damping_ratio": float(zeta[i]),
+                                      "steady_resonant_amplitude_mm": float(amp[i] / (2 * zeta[i]) * 1e3),
                                       "f0_Hz": float(f0[i])} for i in range(B)},
              "probe_error_deg": PROBE_ERR.tolist()}
     with open(os.path.join(TESTS, "expected.json"), "w") as f:

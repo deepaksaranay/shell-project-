@@ -4,7 +4,8 @@ A mistuned 24-blade compressor rotor is run up quickly through a first-bending
 resonance while five casing probes time every blade-tip pass. From the raw
 once-per-rev and trigger times, the task is to identify three things: the
 exciting engine order, and each blade's resonance frequency and modal damping
-ratio.
+ratio, plus the steady-state resonant tip amplitude that feeds a fatigue
+assessment.
 
 ## Difficulty
 
@@ -20,7 +21,8 @@ deflected tip positions. On top of that, the generator adds:
 - unknown probe-angle installation errors;
 - blade stagger and untwist;
 - missed and spurious triggers;
-- a probe dropout over part of the resonance region.
+- a probe dropout over part of the resonance region;
+- a faulty once-per-rev record, with missed and spurious OPR triggers.
 
 The agent has to build the full tip-timing data reduction. That covers blade
 assignment that survives bad triggers, static zeroing, the multi-probe
@@ -37,12 +39,20 @@ points decide whether the damping comes out right:
    frequency by about 0.3% and the damping by about +15%. Damping has to come
    from a transient model driven by the measured speed history.
 
+The same transient effect attenuates the measured peaks, which come out about
+8–12% low on average and up to about 30% low for the lightest-damped blades.
+The steady-state resonant amplitude needed for fatigue therefore has to be
+reconstructed from the identified forcing gain and damping. It cannot be
+read off the data.
+
 ## Reference solution
 
 `solution/solve.py`, called from `solution/solve.sh`:
 
-1. **Shaft angle.** A cubic spline through the OPR times gives the shaft
-   angle at every trigger.
+1. **Shaft angle.** First the OPR record is repaired against the local median
+   period: spurious mid-revolution triggers are dropped and missed pulses are
+   filled in. Then a cubic spline through the OPR times gives the shaft angle
+   at every trigger.
 2. **Blade assignment.** Each trigger goes to the nearest blade slot.
    Triggers far from any slot, and duplicate triggers, are dropped.
 3. **Deflection.** Tip deflection is the tip radius times the angular lag
@@ -60,7 +70,8 @@ points decide whether the damping comes out right:
      offsets and a quadratic drift.
    - Samples beyond 5σ are trimmed as outliers.
 
-   The output is `f_res = EO·f0/√(EO² − S)`.
+   The outputs are `f_res = EO·f0/√(EO² − S)` and the steady resonant
+   amplitude `|G|/(2ζ)`.
 
 The full run takes about 5 s.
 
@@ -74,17 +85,21 @@ require all of the following:
 - the exact engine order;
 - every blade's frequency within 0.25% relative;
 - every blade's damping within 25% relative;
-- the signed relative damping error averaged over the 24 blades within ±7%.
+- the signed relative damping error averaged over the 24 blades within ±7%;
+- every blade's steady-state resonant amplitude within 15% relative.
 
 Non-numeric, non-finite or non-positive values fail.
 
 `authoring/provenance/check.py` and `seed_sweep.sh` reproduce the tolerance
-study below. Each row covers the shipped data plus 3 freshly generated seeds.
+study below. Each row covers the shipped data plus 5 freshly generated seeds.
 
-| Method | Frequency error | Damping, worst blade | Damping, mean bias | Result |
-|---|---|---|---|---|
-| Transient reference | ≤ 0.04% | ≤ 9.4% | within ±1.6% | Passes on every dataset |
-| Steady-state SDOF fit | ≈ 0.3% | — | +8.5% to +15% | Fails on every dataset |
-| Southwell ignored | — | — | +12% to +15% | Fails on every dataset |
+| Method | Frequency error | Damping, worst blade | Damping, mean bias | Amplitude, worst blade | Result |
+|---|---|---|---|---|---|
+| Transient reference | ≤ 0.05% | ≤ 11.4% | within ±2.2% | ≤ 8.3% | Passes on every dataset |
+| Steady-state SDOF fit, measured peak | ≈ 0.3% | — | +8% to +15% | 19–29% | Fails on every dataset |
+| Southwell ignored | — | — | +11% to +15% | — | Fails on every dataset |
+
+Skipping the OPR repair breaks blade assignment, and the analysis falls
+apart.
 
 A constant answer fails the per-blade checks.
