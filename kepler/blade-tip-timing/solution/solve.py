@@ -15,6 +15,15 @@
        wn^2 = (2 pi f0)^2 + S (2 pi Omega)^2
    (complex constant c absorbs probe-angle installation errors).
    f_res = EO * f0 / sqrt(EO^2 - S).
+   This steady-state fit only seeds step 6: the run-up is fast compared with
+   the blades' decay time, so the measured curve is a transient (peak shifted
+   and broadened, ringing after the crossing). Fitting it as steady state
+   biases both frequency and damping.
+6. Per blade, fit a transient model to every probe sample: the slow complex
+   envelope of the SDOF response, integrated under the measured speed
+   history (Omega(t) from the OPR spline), plus per-probe constants and a
+   quadratic common-mode drift (untwist). (f0, zeta) nonlinear; the complex
+   gain and offsets linear (variable projection); 5-sigma outlier trimming.
 """
 import argparse
 import json
@@ -38,10 +47,12 @@ def load(data):
 
 
 def deflections(opr, toas):
-    """Return D[rev, blade, probe] (nan where missing) and Omega[rev] (rev/s)."""
+    """Return D[rev, blade, probe] deflection (nan where missing), Omega[rev]
+    (rev/s), arrival times Tm[rev, blade, probe] and the shaft-angle spline."""
     sp = CubicSpline(opr, 2 * np.pi * np.arange(len(opr)))
     nrev = len(opr) - 1
     D = np.full((nrev, B, NP), np.nan)
+    Tm = np.full((nrev, B, NP), np.nan)
     pitch = 2 * np.pi / B
     for p, toa in enumerate(toas):
         toa = toa[(toa > opr[0]) & (toa < opr[-1])]
@@ -58,15 +69,16 @@ def deflections(opr, toas):
         d = -R * err * pitch
         good = np.abs(err) < 0.06
         seen = np.zeros((nrev, B), bool)
-        for r, b_, dd, e in zip(rev_b[good], blade[good], d[good], np.abs(err[good])):
+        for r, b_, dd, tt in zip(rev_b[good], blade[good], d[good], toa[good]):
             if 0 <= r < nrev:
                 if seen[r, b_]:
                     D[r, b_, p] = np.nan  # duplicate trigger: ambiguous, drop
                 else:
                     D[r, b_, p] = dd
+                    Tm[r, b_, p] = tt
                     seen[r, b_] = True
     Om = 1.0 / np.diff(opr)
-    return D, Om
+    return D, Om, Tm, sp
 
 
 def per_rev_fit(D, eo):
@@ -163,15 +175,87 @@ def fit_blade(Om, q, eo, use_southwell=True, half_window=2.5):
     return eo * f0 / np.sqrt(eo**2 - s), z
 
 
-def analyse(data, use_southwell=True):
+def envelope(tg, Om_g, f0, z, eo, s=S):
+    """Slow complex envelope u(t) of the SDOF response to unit engine-order
+    forcing, x = Re(u e^{i EO Phi}), under the measured speed history.
+    u' = [wn^2 - (wn^2 - w^2 + 2 i z wn w) u] / (2 i w + 2 z wn), exact for
+    piecewise-constant coefficients; starts from the quasi-static value."""
+    w = 2 * np.pi * eo * Om_g
+    wn2 = (2 * np.pi * f0) ** 2 + s * (2 * np.pi * Om_g) ** 2
+    wn = np.sqrt(wn2)
+    den = 2j * w + 2 * z * wn
+    a = -(wn2 - w**2 + 2j * z * wn * w) / den
+    b = wn2 / den
+    h = np.diff(tg)
+    ah = a[:-1] * h
+    alpha = np.exp(ah)
+    beta = b[:-1] * (alpha - 1) / a[:-1]
+    logP = np.concatenate([[0.0], np.cumsum(ah)])
+    P = np.exp(logP)
+    u0 = wn2[0] / (wn2[0] - w[0] ** 2 + 2j * z * wn[0] * w[0])
+    acc = np.concatenate([[0.0], np.cumsum(beta * np.exp(-logP[1:]))])
+    return P * (u0 + acc)
+
+
+def fit_blade_transient(D, Tm, Qc, sp, eo, b, f0_init, z_init, s=S, half=1.6):
+    """Fit the transient SDOF model directly to every probe sample of blade b."""
+    q = Qc[:, b]
+    tr = np.nanmean(Tm[:, b, :], axis=1)
+    sm = np.convolve(np.nan_to_num(np.abs(q)), np.ones(9) / 9, "same")
+    t_pk = tr[np.nanargmax(sm)]
+    rows = np.isfinite(q) & (np.abs(tr - t_pk) < half)
+    d = D[rows, b, :]
+    tt = Tm[rows, b, :]
+    m = np.isfinite(d)
+    y, ts = d[m], tt[m]
+    pidx = np.nonzero(m)[1]
+    tg = np.arange(ts.min() - 0.6, ts.max() + 0.01, 1e-3)
+    Om_g = sp(tg, 1) / (2 * np.pi)
+    Om_g = np.convolve(np.pad(Om_g, 25, mode="edge"), np.ones(51) / 51, "valid")
+    rot = np.exp(1j * eo * ALPHA[pidx])
+    tau = ts - t_pk
+    base = [np.eye(NP)[pidx], tau[:, None], tau[:, None] ** 2]
+    keep = np.ones(len(y), bool)
+
+    def design(p):
+        f0, lz = p
+        u = envelope(tg, Om_g, f0, np.exp(lz), eo, s)
+        ui = np.interp(ts, tg, u.real) + 1j * np.interp(ts, tg, u.imag)
+        v = ui * rot
+        return np.column_stack([v.real, -v.imag] + base)
+
+    def resid(p):
+        A = design(p)
+        coef, *_ = np.linalg.lstsq(A[keep], y[keep], rcond=None)
+        return (A @ coef - y)[keep]
+
+    p0 = [f0_init, np.log(z_init)]
+    for _ in range(2):
+        sol = least_squares(resid, p0, x_scale=[0.05, 0.02])
+        p0 = sol.x
+        A = design(p0)
+        coef, *_ = np.linalg.lstsq(A[keep], y[keep], rcond=None)
+        r = A @ coef - y
+        sig = 1.4826 * np.median(np.abs(r[keep]))
+        keep = np.abs(r) < 5 * sig
+    sol = least_squares(resid, p0, x_scale=[0.05, 0.02])
+    f0, z = sol.x[0], float(np.exp(sol.x[1]))
+    return eo * f0 / np.sqrt(eo**2 - s), z
+
+
+def analyse(data, use_southwell=True, method="transient"):
     opr, toas = load(data)
-    D, Om = deflections(opr, toas)
+    D, Om, Tm, sp = deflections(opr, toas)
     D = zero_static(D, Om)
     eo, Q = choose_eo(D)
     Q = clean_Q(Q)
+    s = S if use_southwell else 0.0
     out = {"engine_order": int(eo), "blades": {}}
     for b in range(B):
         fres, z = fit_blade(Om, Q[:, b], eo, use_southwell)
+        if method == "transient":
+            f0 = fres * np.sqrt(eo**2 - s) / eo
+            fres, z = fit_blade_transient(D, Tm, Q, sp, eo, b, f0, z, s)
         out["blades"][str(b + 1)] = {"resonance_frequency_Hz": float(fres), "damping_ratio": float(z)}
     return out
 

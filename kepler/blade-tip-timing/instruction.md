@@ -1,4 +1,4 @@
-A compressor rotor was run up slowly through a blade resonance while casing
+A compressor rotor was accelerated quickly through a blade resonance while casing
 probes timed every blade tip pass. Each blade's first bending mode was
 crossed by an engine-order excitation of unknown order. The rotor is mistuned,
 so each blade crosses at its own speed.

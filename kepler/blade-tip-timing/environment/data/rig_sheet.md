@@ -23,8 +23,9 @@ which engine order drives the resonance crossed in this run.
 
 ## Run
 
-The shaft runs up slowly from about 6550 rpm to 7550 rpm over about 44 s. The
-speed is not perfectly smooth.
+This was a fast acceleration. The shaft runs up from about 6550 rpm to
+7550 rpm in about 6 s, and the speed is not perfectly smooth. The blades'
+damping is low, typical of integrally bladed rotors.
 
 ## Sensors
 
@@ -44,7 +45,8 @@ speed is not perfectly smooth.
   The installation tolerance on each probe angle is ±0.1°.
 - **Probe files:** each file lists every trigger time (s) for that probe, in
   time order. The trigger electronics occasionally miss a blade pass, and now
-  and then they fire on noise.
+  and then they fire on noise. One probe's fibre connection was intermittent
+  during this run.
 - **Timing:** jitter is about 0.3 µs rms. All channels share one clock.
 
 ## Blade numbering

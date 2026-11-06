@@ -25,14 +25,15 @@ EO = 6
 S = 4.2                  # Southwell coefficient (stated)
 PROBE_NOM = np.array([0.0, 14.0, 48.5, 56.5, 153.0])  # deg, stated nominal
 PROBE_ERR = rng.uniform(-0.08, 0.08, 5)         # unknown install error, deg
-RPM0, RPM1, TDUR = 6550.0, 7550.0, 44.0
+RPM0, RPM1, TDUR = 6550.0, 7550.0, 6.0
 DT = 1.0 / 25000.0
+PROBE4_GAP = (2.575, 3.70)
 JIT_TOA = 0.30e-6
 JIT_OPR = 0.15e-6
 
 f0 = 662.0 * (1 + 0.012 * rng.standard_normal(B))
-zeta = rng.uniform(0.0025, 0.0060, B)
-amp = 3.2e-6 * (1 + 0.15 * rng.standard_normal(B))   # static-equivalent forcing, m
+zeta = rng.uniform(0.0012, 0.0035, B)
+amp = 1.5e-6 * (1 + 0.15 * rng.standard_normal(B))   # static-equivalent forcing, m
 stagger = 0.4e-3 * rng.standard_normal(B)            # static tip position error, m
 untwist = 0.25e-3 * (1 + 0.3 * rng.standard_normal(B))  # static drift at 7000 rpm, m
 psi = rng.uniform(0, 2 * np.pi)
@@ -111,6 +112,8 @@ def main():
         toa = toa + JIT_TOA * rng.standard_normal(len(toa))
         # dropouts and spurious triggers
         keep = rng.random(len(toa)) > 0.0007
+        if p == 3:  # probe 4 fibre fault: no triggers for part of the run
+            keep &= ~((toa > PROBE4_GAP[0]) & (toa < PROBE4_GAP[1]))
         toa = toa[keep]
         spur = rng.uniform(toa[0], toa[-1], int(0.0002 * len(toa)) + 3)
         toa = np.sort(np.concatenate([toa, spur]))
@@ -125,6 +128,7 @@ def main():
              "probe_error_deg": PROBE_ERR.tolist()}
     with open(os.path.join(TESTS, "expected.json"), "w") as f:
         json.dump(truth, f, indent=1)
+    print("speed at resonance crossing (s):", np.round((fres / EO * 60 - RPM0) / (RPM1 - RPM0) * TDUR, 2))
     print("revs", n_rev, "fres range", fres.min(), fres.max(),
           "res rpm", (fres / EO * 60).min(), (fres / EO * 60).max())
     peak = amp / (2 * zeta)
