@@ -1,9 +1,10 @@
-# Kepler task: bearing-impedance-identification
+# Kepler tasks
 
-- `bearing-impedance-identification/`: the task bundle (task.toml, instruction.md,
-  environment/, solution/, tests/).
-- `bearing-impedance-identification.zip`: the same bundle zipped at its root, ready to upload.
-- `generator/`: NOT part of the bundle.
-  - `generate.py` regenerates the data and `tests/expected.json`.
-  - `ablate.py` and `alt_method.py` check that the tolerance separates
-    correct methods from flawed ones.
+| task | bundle | upload zip | generator (not in bundle) |
+|---|---|---|---|
+| blade-tip-timing (current) | `blade-tip-timing/` | `blade-tip-timing.zip` | `generator_btt/` |
+| bearing-impedance-identification (earlier draft) | `bearing-impedance-identification/` | `bearing-impedance-identification.zip` | `generator/` |
+
+- Each generator folder has `generate.py`, which regenerates the data and `tests/expected.json`.
+- It also has scripts (`check.py`, `alt_*.py`, `ablate.py`) showing that the
+  stated tolerances pass correct methods and fail flawed ones.
