@@ -49,10 +49,18 @@ Shortcuts and modelling mistakes lead to designs that fail:
 
 ## Reference solution
 
-`solution/solve.py` uses `solution/moc_model.py`, the same MOC formulation as
-the verifier, at dt = 0.01 s. It fixes the volume at 17.9 m³ and scans the
-initial gas fraction and two orifice sizes. It then picks the design with the
-largest slack against every limit:
+`solution/solve.py` is an independent transient model, written separately
+from the checking code. It differs from the checking model in three ways:
+
+| aspect | reference model | checking model |
+|---|---|---|
+| discretisation | space-line interpolation at Courant number ≤ 1 | wave-speed adjustment |
+| node solver | scipy `fsolve` at the pump/check-valve/vessel node | Newton iteration |
+| rotor speed | Heun integration | trapezoidal integration |
+
+On five test designs the two models agree to within 0.01 m. The reference
+fixes the volume at 17.9 m³, scans the initial gas fraction and two orifice
+sizes, and writes the design with the largest slack against every limit:
 
 | design choice | value |
 |---|---|
@@ -68,7 +76,7 @@ Its predicted performance:
 | maximum gauge pressure head | 102.4 m |
 | maximum gas fraction | 0.870 |
 
-The search takes about 1 minute.
+The search takes about 1.5 minutes.
 
 ## Verification
 
@@ -76,7 +84,7 @@ The search takes about 1 minute.
 `/app/output/surge_vessel_design.json` and check the budget, the ranges and
 the number types. They then simulate the design with `tests/hydraulics.py`,
 using MOC at dt = 0.005 s with wave-speed adjustments under 0.5%, over the
-full 180 s.
+full 180 s. This model is not the one in the reference solution.
 
 **What the design must meet:**
 

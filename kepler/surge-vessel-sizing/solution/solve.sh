@@ -1,4 +1,5 @@
-#!/bin/bash
-set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-python3 "$SCRIPT_DIR/solve.py"
+#!/usr/bin/env bash
+# Oracle: size the vessel with the independent transient model in solve.py.
+set -eu
+here=$(dirname "$(readlink -f "$0")")
+exec python3 "$here/solve.py"

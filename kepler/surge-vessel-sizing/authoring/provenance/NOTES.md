@@ -1,7 +1,18 @@
 # Provenance
 
 - `environment/data/system.json`: hand-built design case. `tests/system.json` is an identical copy for the verifier.
-- `tests/hydraulics.py`: the verifier's MOC model. `solution/moc_model.py` is a copy used by the reference solution.
+- `tests/hydraulics.py`: the checking MOC model. It uses integer reaches, wave-speed adjustment and Newton iteration at the pump node.
+- `solution/solve.py`: an independent model with space-line interpolation, scipy `fsolve` and Heun speed integration. Comparison on five designs (dt = 0.01 s reference, dt = 0.005 s checking):
+
+| design | reference min head | checking min head | difference |
+|---|---|---|---|
+| 17.9 m³, 0.445, 0.12 m | 3.899 m | 3.893 m | 0.006 m |
+| 18.0 m³, 0.42, 0.10 m | 3.045 m | 3.039 m | 0.006 m |
+| 22 m³, 0.40, 0.06 m | 5.969 m | 5.964 m | 0.005 m |
+| 24 m³, 0.45, 0.12 m | 9.644 m | 9.638 m | 0.006 m |
+| 18.5 m³, 0.45, 0.25 m | 4.699 m | 4.693 m | 0.006 m |
+
+  Max gauge head agreed to within 0.01 m and the gas fraction to within 0.0001 on every design.
 - `optimize.py` (coarse scan) and `refine.py` (fine scan) locate the minimum feasible volume, about 16.9 m³ at about 45% initial gas. Run them from the bundle root: `python3 authoring/provenance/refine.py 0.01 16.5,17.0`.
 - Time-step convergence of the metrics, for (V, gas fraction, d):
 

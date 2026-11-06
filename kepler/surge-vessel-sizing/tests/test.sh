@@ -1,15 +1,10 @@
-#!/bin/bash
-# Runs offline in the verifier image (tests/Dockerfile); installs nothing.
-mkdir -p /logs/verifier
-echo 0 > /logs/verifier/reward.txt
-
-cd /tests
-python3 -m pytest --ctrf /logs/verifier/ctrf.json /tests/test_outputs.py -rA
-status=$?
-
-if [ "$status" -eq 0 ]; then
-  echo 1 > /logs/verifier/reward.txt
-else
-  echo 0 > /logs/verifier/reward.txt
+#!/usr/bin/env bash
+# Surge-vessel design check: simulate the submitted design and record 0/1.
+set -u
+LOGDIR=/logs/verifier
+mkdir -p "$LOGDIR"
+reward=0
+if python3 -m pytest -q -rA -p no:cacheprovider --ctrf "$LOGDIR/ctrf.json" /tests/test_outputs.py; then
+  reward=1
 fi
-exit 0
+printf '%s\n' "$reward" > "$LOGDIR/reward.txt"

@@ -1,11 +1,10 @@
+# Workstation image for the rising-main surge study.
 FROM python:3.13-slim-bookworm
 
-ENV OMP_NUM_THREADS=2 \
-    MKL_NUM_THREADS=2 \
-    OPENBLAS_NUM_THREADS=2
+ARG PIP_NO_CACHE_DIR=1
+RUN python3 -m pip install numpy==2.2.6 scipy==1.15.3 pandas==2.2.3 matplotlib==3.10.3
 
-RUN pip install --no-cache-dir numpy==2.3.3 scipy==1.16.2 pandas==2.3.3
-
+ENV OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2 MPLBACKEND=Agg
+COPY data /app/data
 WORKDIR /app
-COPY data/ /app/data/
-RUN mkdir -p /app/output
+RUN mkdir -p /app/output /app/work
