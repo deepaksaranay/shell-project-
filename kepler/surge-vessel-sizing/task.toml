@@ -1,0 +1,45 @@
+schema_version = "1.4"
+
+artifacts = ["/app/output/surge_vessel_design.json"]
+
+[task]
+name = "afterquery/surge-vessel-sizing"
+description = "Size an air vessel (total volume, initial gas volume, inflow orifice) for a pumped rising main so that, after a pump trip, the whole pipeline stays within its pressure limits under a volume budget."
+authors = [{ name = "Deepak Kumar", email = "deepakkumar.dar@gmail.com" }]
+keywords = ["water hammer", "hydraulic transients", "method of characteristics", "air vessel", "surge protection", "pump trip", "rising main"]
+
+[metadata]
+author_name = "Deepak Kumar"
+author_email = "deepakkumar.dar@gmail.com"
+author_organization = "TODO: your university/employer, or exactly Independent Researcher"
+author_profile = "TODO: Google Scholar, LinkedIn or personal site URL"
+conflicts_of_interest = "None"
+domain = "engineering-sciences"
+field = "mechanical-engineering"
+subfield = "thermofluids: hydraulic transients and surge protection of pumping mains"
+category = "Science"
+subcategory = "Mechanical & Aerospace Engineering"
+tags = ["water-hammer", "hydraulic-transients", "method-of-characteristics", "surge-vessel", "pump-trip", "pipeline-design"]
+expert_time_estimate_hours = 10
+relevant_experience = "TODO: your own background for THIS task (e.g. pipeline/pumping-station transient analysis, surge protection design). Generic text fails review."
+difficulty_explanation = "Synthetic but realistic design case (system data in environment/data/system.json); no simulator or answer ships. The agent must build a converged transient model itself: method of characteristics in three series pipes with different diameters and wave speeds, quasi-steady friction, the steady operating point from the pump and system curves, pump run-down from homologous head and torque curves with rotor inertia, ideal check-valve closure once the pump can no longer beat the line pressure, an air-vessel boundary with polytropic gas, changing water level and differential connection losses, and the pressure envelope along the whole route profile. It must then search a three-parameter design space against interacting constraints: the minimum pressure is set by the mass oscillation over the knee about 30 s after the trip, too much initial gas drains the vessel past 90%, and a large inflow orifice lets the return upsurge exceed 105 m. The feasible minimum is about 16.9 m3 against an 18.0 m3 budget, where only initial gas fractions of about 0.42-0.46 work. Checking pressure only at the pump (about 12 m3), isothermal gas (about 15 m3), an instant pump stop (no feasible design under 30 m3) and the 50%-gas rule of thumb all lead to failing designs."
+solution_explanation = "Build an MOC model of the rising main as described in the modelling basis (fixed time step with integer reaches and small wave-speed adjustments; interior, junction and reservoir characteristics; a pump/check-valve/vessel node solved by Newton iteration with trapezoidal rotor-speed integration; the check valve closes when the pump's zero-flow head no longer exceeds the shut-valve line head). Verify convergence in time step. Fix the volume just under the budget, scan the initial gas fraction and the orifice size, and choose the design with the largest slack against all three limits: 17.9 m3, 7.966 m3 gas, 0.12 m orifice (minimum absolute head 3.90 m, maximum gauge head 102.4 m, gas fraction 0.870)."
+verification_explanation = "The verifier reads /app/output/surge_vessel_design.json, checks the budget (at most 18.0 m3), the orifice range, the initial gas bound and the number types, then simulates the design with its own MOC model (tests/hydraulics.py, dt = 0.005 s, wave-speed adjustment under 0.5%) over the full 180 s. It requires minimum absolute pressure head at least 3.0 m at every computational section of all pipes, maximum gauge pressure head at most 105.0 m, and gas fraction at most 0.9. Ground truth is this physical simulation of the submitted design; the model is converged (metrics change by under 0.05 m between dt = 0.02, 0.01 and 0.005 s), small against the roughly 1 m slack available at the budget. Lazy or mistaken designs fail: budget volume with 30%, 50% or 70% initial gas, a large orifice, pump-node-only sizing, isothermal-gas sizing and an over-budget vessel."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[verifier.environment]
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 28800.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
+network_mode = "public"

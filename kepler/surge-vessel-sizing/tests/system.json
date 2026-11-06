@@ -1,0 +1,123 @@
+{
+  "fluid": {
+    "density_kg_m3": 998.0,
+    "gravity_m_s2": 9.81,
+    "atmospheric_pressure_head_m": 10.33,
+    "vapour_pressure_head_m": 0.24
+  },
+  "suction_reservoir": {
+    "water_level_m": 102.0
+  },
+  "discharge_reservoir": {
+    "water_level_m": 175.0
+  },
+  "pump": {
+    "centreline_elevation_m": 100.0,
+    "rated_flow_m3_s": 0.45,
+    "rated_head_m": 100.0,
+    "rated_speed_rpm": 1480.0,
+    "rated_torque_N_m": 3384.0,
+    "polar_moment_of_inertia_kg_m2": 25.0,
+    "head_coefficients": {
+      "h0": 1.33,
+      "h1": 0.02,
+      "h2": -0.35
+    },
+    "torque_coefficients": {
+      "b0": 0.45,
+      "b1": 0.65,
+      "b2": -0.1
+    },
+    "homologous_form": "h = H/H_R = h0*a^2 + h1*a*v + h2*v^2 ; b = T/T_R = b0*a^2 + b1*a*v + b2*v^2 ; a = N/N_R, v = Q/Q_R ; valid for a >= 0, v >= 0"
+  },
+  "check_valve": {
+    "location": "pump discharge, upstream of the air-vessel tee",
+    "behaviour": "ideal: closes instantly and permanently when the pump flow would reverse"
+  },
+  "pipes": [
+    {
+      "id": "P1",
+      "length_m": 1200.0,
+      "diameter_m": 0.6,
+      "wave_speed_m_s": 1050.0,
+      "darcy_friction_factor": 0.015
+    },
+    {
+      "id": "P2",
+      "length_m": 2300.0,
+      "diameter_m": 0.6,
+      "wave_speed_m_s": 1050.0,
+      "darcy_friction_factor": 0.015
+    },
+    {
+      "id": "P3",
+      "length_m": 1800.0,
+      "diameter_m": 0.5,
+      "wave_speed_m_s": 980.0,
+      "darcy_friction_factor": 0.017
+    }
+  ],
+  "profile": {
+    "description": "pipe centreline elevation versus chainage from the pump (P1 starts at 0, P2 at 1200, P3 at 3500, discharge at 5300); linear between points",
+    "chainage_m": [
+      0.0,
+      400.0,
+      1500.0,
+      2600.0,
+      4000.0,
+      4600.0,
+      5300.0
+    ],
+    "elevation_m": [
+      100.0,
+      112.0,
+      150.0,
+      148.0,
+      158.0,
+      152.0,
+      165.0
+    ]
+  },
+  "air_vessel": {
+    "location": "tee at chainage 0, immediately downstream of the check valve",
+    "shape": "vertical cylinder, internal height = 2.5 x internal diameter, bottom at elevation 100.0 m",
+    "bottom_elevation_m": 100.0,
+    "height_to_diameter_ratio": 2.5,
+    "gas_polytropic_exponent": 1.2,
+    "outflow_connection": {
+      "diameter_m": 0.35,
+      "loss_coefficient": 0.5
+    },
+    "inflow_orifice": {
+      "loss_coefficient": 2.5,
+      "note": "differential orifice: water returning into the vessel passes the orifice; its diameter is a design choice"
+    },
+    "connection_loss_definition": "head loss = K * Q^2 / (2 g A^2), A = area of the outflow connection (outflow) or of the inflow orifice (inflow)"
+  },
+  "event": {
+    "description": "pump trip at t = 0 from steady operation: motor torque drops to zero; the pump runs down under its own hydraulic torque",
+    "simulated_duration_s": 180.0
+  },
+  "design_limits": {
+    "minimum_absolute_pressure_head_m": 3.0,
+    "maximum_gauge_pressure_head_m": 105.0,
+    "maximum_gas_fraction_of_vessel": 0.9,
+    "inflow_orifice_diameter_range_m": [
+      0.05,
+      0.35
+    ]
+  },
+  "modelling_basis": [
+    "One-dimensional elastic water hammer in each pipe with the stated wave speeds; quasi-steady Darcy friction with the stated constant friction factors; no unsteady friction.",
+    "Minor losses at pipe junctions, at the discharge and between the suction reservoir and the pump are negligible; both reservoir levels stay constant.",
+    "Initial condition: steady flow at the pump/system operating point with the motor running at rated speed.",
+    "Pump: the homologous head and torque polynomials hold for a >= 0, v >= 0; after the trip the only torque on the rotating assembly is the pump's hydraulic torque.",
+    "Check valve: ideal, as stated; once closed it stays closed.",
+    "Air vessel gas: H_abs * V_gas^n = constant, where H_abs is the absolute pressure head of the gas (gauge head + atmospheric head). The water-surface elevation in the vessel follows from the water volume and the vessel shape. Head at the tee = gas gauge head + water-surface elevation - connection loss (loss opposes the flow direction).",
+    "Pressure head along the pipeline is evaluated at the pipe centreline (profile elevation) everywhere along all three pipes over the whole simulated duration; vapour cavities and column separation are not modelled because the minimum-pressure limit is set well above vapour pressure.",
+    "The total vessel volume is the internal volume of the cylinder; the initial gas volume is the gas volume at the steady pre-trip state."
+  ],
+  "design_budget": {
+    "maximum_vessel_total_volume_m3": 18.0
+  }
+}
