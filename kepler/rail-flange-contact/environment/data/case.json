@@ -1,0 +1,86 @@
+{
+  "materials": {
+    "youngs_modulus_Pa": 210000000000.0,
+    "poisson_ratio": 0.28,
+    "note": "wheel and rail are the same steel"
+  },
+  "coefficient_of_friction": 0.35,
+  "wheel": {
+    "tape_circle_radius_mm": 460.0,
+    "tape_circle_y_mm": 0.0,
+    "profile": "wheel_profile.csv: wheel surface height z_w (mm, upward) against wheel lateral coordinate y_w (mm), section through the wheel axis; z_w = 0 at the tape circle (y_w = 0); the wheel radius at y_w is r(y_w) = tape_circle_radius_mm - z_w(y_w)"
+  },
+  "rail": {
+    "profile": "rail_profile.csv: rail head height z_r (mm, upward) against track lateral coordinate y (mm); the rail is straight"
+  },
+  "frames": {
+    "track": "x along the track in the direction of travel, y lateral pointing toward the track centre (the flange side), z upward",
+    "wheel_position": "the wheel profile sits at y = y_w + lateral_shift and its surface at height z_w(y - lateral_shift) + vertical_position; lateral_shift and vertical_position are unknown and follow from equilibrium (no wheel roll)",
+    "contact_search": "the vertical separation g(y) = z_w(y - lateral_shift) + vertical_position - z_r(y); each local minimum of g is a contact point; the potential patch of a contact point is the part of the profiles between the neighbouring local maxima of g; a patch is in contact when the bodies interpenetrate there",
+    "patch_plane": "each patch is planar, in the plane tangent to the rail profile at its contact point; the contact angle gamma is the rail slope angle there (atan dz_r/dy, negative where the rail falls toward +y); local axes: x (travel), s = (cos gamma, sin gamma) in (y, z), n = (-sin gamma, cos gamma) pointing from the rail into the wheel",
+    "patch_gap": "undeformed normal separation in a patch: both profiles (wheel in its current position) rotated into the (s, n) axes, separation n_wheel(s) - n_rail(s), plus x^2 / (2 R) with R = r_i / cos(gamma), r_i the wheel radius at the contact point (the rail is straight); negative values are interpenetration",
+    "elastic_independence": "the patches are far apart and are treated as elastically independent half-spaces; materials are quasi-identical so normal and tangential problems decouple"
+  },
+  "kinematics": {
+    "rigid_slip": "rigid slip velocity of wheel material relative to the rail, divided by the speed V, at local patch coordinates (x, s): (xi - phi*s, eta + phi*x)",
+    "xi": "xi_i = 1 - (Omega * r_i / V) * cos(psi)",
+    "eta": "eta_i = -(Omega * r_i / V) * sin(psi) * cos(gamma_i)",
+    "phi": "phi_i = -(Omega / V) * cos(psi) * sin(gamma_i)   (1/m)",
+    "rolling": "steady rolling; material passes through each patch from +x (leading edge) to -x"
+  },
+  "equilibrium": "the wheelset applies to this wheel a downward force Q and a lateral force Y toward -y (pressing the flange against the rail); in equilibrium the contact forces exerted by the rail on the wheel, summed over the patches and resolved in the track frame, give sum F_z = Q and sum F_y = Y. A patch force with normal component N and tangential components (F_x, F_s) contributes F_y = F_s cos(gamma) - N sin(gamma), F_z = F_s sin(gamma) + N cos(gamma)",
+  "initial_guess": {
+    "lateral_shift_mm": 7.5,
+    "vertical_position_mm": 0.0
+  },
+  "load_cases": [
+    {
+      "id": "A",
+      "vertical_load_N": 80000.0,
+      "lateral_force_N": 20000.0,
+      "yaw_angle_rad": 0.0,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.347826
+    },
+    {
+      "id": "B",
+      "vertical_load_N": 80000.0,
+      "lateral_force_N": 30000.0,
+      "yaw_angle_rad": -0.0015,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.347826
+    },
+    {
+      "id": "C",
+      "vertical_load_N": 80000.0,
+      "lateral_force_N": 40000.0,
+      "yaw_angle_rad": -0.003,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.347826
+    },
+    {
+      "id": "D",
+      "vertical_load_N": 80000.0,
+      "lateral_force_N": 25000.0,
+      "yaw_angle_rad": 0.0015,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.347826
+    },
+    {
+      "id": "E",
+      "vertical_load_N": 80000.0,
+      "lateral_force_N": 30000.0,
+      "yaw_angle_rad": -0.0015,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.282609
+    },
+    {
+      "id": "F",
+      "vertical_load_N": 60000.0,
+      "lateral_force_N": 36000.0,
+      "yaw_angle_rad": -0.003,
+      "speed_m_per_s": 25.0,
+      "wheel_angular_velocity_rad_per_s": 54.347826
+    }
+  ]
+}
