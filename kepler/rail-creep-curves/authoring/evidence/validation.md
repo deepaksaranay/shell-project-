@@ -66,3 +66,31 @@ pressure +0.70%. Its force errors, as a share of μN:
 Cases B, F, G and H stopped at the 3000-iteration cap. They were in a
 small 2-cycle at one stick/slip boundary element, and their forces are
 within the limits shown above.
+
+## Structurally independent submission through the verifier
+
+`authoring/provenance/independent_submission.py` was written separately
+from the generator and from `solution/solve.py`. It uses:
+
+- non-square 0.30 × 0.40 mm elements on a grid offset by 0.07 mm;
+- zero-padded FFT convolution of the closed-form rectangle kernels;
+- a Polonsky–Keer conjugate-gradient normal solver;
+- ADMM for each rolling step of the transient scheme.
+
+Its output (`independent_submission_output.json`) scored 10/10 passed
+(reward 1): area +1.14% (208.4 mm²), peak pressure +1.87% (830.8 MPa).
+Its force errors, as a share of μN:
+
+| A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|
+| 0.29% | 0.69% | 0.50% | 0.66% | 0.67% | 1.35% | 0.72% | 0.77% |
+
+## Anti-cheat emulation
+
+| output | reward |
+|---|---|
+| no file | 0 |
+| symlink to the answer key | 0 |
+| copy of the answer key | 0 |
+| independent submission | 1 |
+| oracle | 1 |

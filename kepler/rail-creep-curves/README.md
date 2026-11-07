@@ -99,27 +99,32 @@ must be numeric and finite, and every case must be present exactly once.
 | contact area | within 4% |
 | peak pressure | within 5% |
 
-**Where the reference comes from.** `tests/reference_solution.json` holds
-the exact solution computed with `authoring/provenance/problem.py` at
-element sizes of 0.5 mm and 0.35 mm, then Richardson-extrapolated (first
-order in element size). The reference solution doesn't produce these values.
+**Where the answer key comes from.** `tests/answer_key.json` holds the
+exact solution computed with `authoring/provenance/problem.py` at element
+sizes of 0.5 mm and 0.35 mm, then Richardson-extrapolated (first order in
+element size). The shipped solution doesn't produce these values. The
+output must be a regular file (no symlinks) with exactly the documented
+keys.
 
-**Independent implementation.** `authoring/provenance/independent_check.py`
-uses a different tangential algorithm: it solves the steady-state equations
-s = w + Kq directly, with an active-set method. It runs on a 0.45 mm grid
-shifted by a quarter element. Through the verifier it passes all 10 checks:
+**How the limits were set.** The tolerances come from how closely
+structurally different correct implementations agree with the key. Each one
+was scored through the verifier:
 
-| check | result |
-|---|---|
-| worst creep force | 1.75% of μN |
-| contact area | +1.51% |
-| peak pressure | +0.70% |
+| implementation | how it differs | worst force (share of μN) | area | peak pressure | result |
+|---|---|---|---|---|---|
+| `authoring/provenance/independent_submission.py` | separately written; non-square 0.30 × 0.40 mm elements on an offset grid, FFT convolution, Polonsky–Keer CG normal solver, ADMM per rolling step | 1.35% (case F) | +1.14% | +1.87% | 10/10 |
+| `solution/solve.py` (shipped) | 0.4 mm dense matrices, active-set normal solve, FISTA per rolling step | 1.81% (case F) | +1.70% | +1.58% | 10/10 |
+| `authoring/provenance/independent_check.py` | steady-state equations solved directly by an active-set method, 0.45 mm grid shifted by a quarter element | 1.75% | +1.51% | +0.70% | 10/10 |
+| generator, 0.5 mm / 0.35 mm grids | — | 1.6% / 1.1% | — | — | — |
 
-Its output is in `authoring/evidence/independent_output.json`.
+Correct methods land within 0.7–1.9%, and the limits leave margin for
+discretisation choices. The shortcuts in the Difficulty table fail:
 
-**How the limits were set.** The worst force errors against the
-extrapolated reference are 1.6% of μN at 0.5 mm and 1.1% at 0.35 mm on the
-generator's own grids. The shipped solution is at 1.81% and the independent
-implementation at 1.75%. The Hertz-ellipse shortcut fails the area and
-pressure limits and several force cases. The 1 mm grid and linear theory
-fail the force limits.
+- the Hertz ellipse fails the area and pressure limits and several force
+  cases;
+- the 1 mm grid and linear theory fail the force limits.
+
+A missing file, a symlink to any file, or extra or renamed keys score 0.
+
+Outputs are in `authoring/evidence/`, with the per-case errors in
+`authoring/evidence/validation.md`.
