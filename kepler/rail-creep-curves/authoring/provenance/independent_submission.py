@@ -144,8 +144,13 @@ def main(data_dir, out_path):
         f = np.where(n > gbound, gbound / np.maximum(n, 1e-300), 1.0)
         return np.concatenate([vx * f, vy * f])
 
+    ckpt = out_path + ".partial.json"
+    done = json.load(open(ckpt)) if os.path.exists(ckpt) else {}
     results = []
     for cs in case["creepage_cases"]:
+        if cs["id"] in done:  # resume after an interruption
+            results.append(done[cs["id"]])
+            continue
         w = np.concatenate([cs["xi"] - cs["phi_per_m"] * Yg[I], cs["eta"] + cs["phi_per_m"] * Xg[I]]) * DX
         q = np.zeros(2 * m); z = np.zeros(2 * m); lam = np.zeros(2 * m)
         for step in range(4000):
@@ -163,6 +168,8 @@ def main(data_dir, out_path):
             if change <= 1e-9 * gbound.max() and step > 2:
                 break
         results.append({"id": cs["id"], "Fx_N": float(q[:m].sum() * dA), "Fy_N": float(q[m:].sum() * dA)})
+        done[cs["id"]] = results[-1]
+        json.dump(done, open(ckpt, "w"))
         print(results[-1], "steps", step + 1, flush=True)
     out = {"contact_area_mm2": float(area * 1e6), "max_pressure_MPa": float(p.max() / 1e6), "cases": results}
     with open(out_path, "w") as f:
