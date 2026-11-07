@@ -24,8 +24,9 @@ import numpy as np
 
 DATA = os.environ.get("RFC_DATA", "/app/data")
 OUT = os.environ.get("RFC_OUT", "/app/output/flange_contact.json")
-EL = 0.3e-3          # element size (m)
+EL = 0.4e-3          # element size (m)
 XHALF = 9.0e-3       # half length of the patch grid in the rolling direction
+TOL_IN, TOL_STEP = float(os.environ.get("RFC_TIN", 1e-8)), float(os.environ.get("RFC_TSTEP", 1e-7))
 
 
 def corner_sum(X, Y, hx, hy, kind):
@@ -61,6 +62,7 @@ class Setup:
         self.r0 = c["wheel"]["tape_circle_radius_mm"]
         self.zw_tape = float(np.interp(c["wheel"]["tape_circle_y_mm"], self.yw, self.zw))
         self.cache = {}
+        self.kcache = {}
 
     def points(self, ys, zc):
         yf = np.arange(max(self.yr[0], self.yw[0] + ys), min(self.yr[-1], self.yw[-1] + ys), 0.01)
@@ -102,13 +104,27 @@ class Setup:
         H = np.interp(SS, sc, h, left=1.0, right=1.0) + XX ** 2 / (2 * R)
         return dict(X=XX.ravel(), S=SS.ravel(), H=H.ravel(), nx=nx, ny=ny, r=ri, gamma=gm, pt=pt)
 
+    def kernels(self, nx, ny):
+        """Influence numbers for every grid offset (the grid is regular, so
+        each matrix is a lookup into these tables)."""
+        key = (nx, ny)
+        if key not in self.kcache:
+            i = np.arange(-(nx - 1), nx) * EL; j = np.arange(-(ny - 1), ny) * EL
+            DXo, DSo = np.meshgrid(i, j, indexing="ij")
+            c0 = 1 / (math.pi * self.G); nu = self.nu
+            I1, Ixx, Iyy, Ixy = (corner_sum(DXo, DSo, EL, EL, k) for k in ("n", "xx", "yy", "xy"))
+            self.kcache[key] = {"n": (1 - nu) * c0 * I1, "xx": c0 * ((1 - nu) * I1 + nu * Ixx),
+                                "yy": c0 * ((1 - nu) * I1 + nu * Iyy), "xy": c0 * nu * Ixy}
+        return self.kcache[key]
+
     def normal(self, P):
         H = P["H"]
         cand = np.nonzero(H < 2e-5)[0]
         if not (H[cand] < 0).any():
             return np.zeros_like(H)
-        X, S = P["X"][cand], P["S"][cand]
-        A = (1 - self.nu) / (math.pi * self.G) * corner_sum(X[:, None] - X[None, :], S[:, None] - S[None, :], EL, EL, "n")
+        K = self.kernels(P["nx"], P["ny"])["n"]
+        ix, iy = cand // P["ny"], cand % P["ny"]
+        A = K[ix[:, None] - ix[None, :] + P["nx"] - 1, iy[:, None] - iy[None, :] + P["ny"] - 1]
         h = H[cand]
         act = np.nonzero(h < 0)[0]
         for _ in range(400):
@@ -130,11 +146,11 @@ class Setup:
         ix = C // P["ny"]; iy = C % P["ny"]
         ok = ix + 1 < P["nx"]
         up = np.where(ok, (ix + 1) * P["ny"] + iy, C)
-        c0 = 1 / (math.pi * self.G); nu = self.nu
+        K = self.kernels(P["nx"], P["ny"])
         def infl(rows):
-            dX = X[rows][:, None] - X[C][None, :]; dS = S[rows][:, None] - S[C][None, :]
-            I1, Ixx, Iyy, Ixy = (corner_sum(dX, dS, EL, EL, k) for k in ("n", "xx", "yy", "xy"))
-            return np.block([[c0 * ((1 - nu) * I1 + nu * Ixx), c0 * nu * Ixy], [c0 * nu * Ixy, c0 * ((1 - nu) * I1 + nu * Iyy)]])
+            a = rows // P["ny"]; b = rows % P["ny"]
+            di = a[:, None] - ix[None, :] + P["nx"] - 1; dj = b[:, None] - iy[None, :] + P["ny"] - 1
+            return np.block([[K["xx"][di, dj], K["xy"][di, dj]], [K["xy"][di, dj], K["yy"][di, dj]]])
         U = infl(C); Vm = infl(up); Vm[np.concatenate([~ok, ~ok])] = 0.0
         L = np.linalg.eigvalsh(U)[-1]
         g = self.mu * p[C]
@@ -149,14 +165,16 @@ class Setup:
             z = q.copy(); yv = q.copy(); t = 1.0
             for _ in range(5000):
                 zn = proj(yv - (U @ yv + b) / L)
+                if np.dot(yv - zn, zn - z) > 0:      # adaptive restart of the momentum
+                    t = 1.0
                 tn = 0.5 * (1 + math.sqrt(1 + 4 * t * t))
                 yv = zn + (t - 1) / tn * (zn - z)
-                done = np.max(np.abs(zn - z)) <= 1e-10 * g.max()
+                done = np.max(np.abs(zn - z)) <= TOL_IN * g.max()
                 z, t = zn, tn
                 if done:
                     break
             ch = np.max(np.abs(z - q)); q = z
-            if ch <= 1e-9 * g.max() and step > 2:
+            if ch <= TOL_STEP * g.max() and step > 2:
                 break
         dA = EL * EL
         return q[:m].sum() * dA, q[m:].sum() * dA, q
@@ -216,17 +234,15 @@ def solve_case(st, cs, ys, zc):
         J = J + np.outer(dr - J @ dv, dv) / (dv @ dv)
         v, r, res = v2, r2, res2
     print(cs["id"], "residual", r, flush=True)
-    out = {"id": cs["id"], "lateral_shift_mm": float(v[0]), "vertical_position_mm": float(v[1])}
+    out = {"id": cs["id"], "lateral_shift_mm": float(v[0])}
     tread = [i for i in res if abs(i["P"]["gamma"]) < math.radians(20)]
     flange = [i for i in res if abs(i["P"]["gamma"]) >= math.radians(20)]
     for name, lst in (("tread", tread), ("flange", flange)):
         if not lst:
             out[name] = None; continue
         i = lst[0]
-        out[name] = {"contact_angle_deg": math.degrees(i["P"]["gamma"]), "normal_force_N": i["N"],
-                     "area_mm2": float((i["p"] > 0).sum() * EL * EL * 1e6), "max_pressure_MPa": float(i["p"].max() / 1e6),
-                     "Fx_N": i["Fx"], "Fs_N": i["Fs"]}
-    out["total_Fx_N"] = float(sum(i["Fx"] for i in res))
+        out[name] = {"contact_angle_deg": math.degrees(i["P"]["gamma"]), "normal_force_N": float(i["N"]),
+                     "Fx_N": float(i["Fx"]), "Fs_N": float(i["Fs"])}
     return out
 
 
