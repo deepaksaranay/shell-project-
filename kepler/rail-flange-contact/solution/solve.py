@@ -65,15 +65,18 @@ class Setup:
         self.kcache = {}
 
     def points(self, ys, zc):
-        yf = np.arange(max(self.yr[0], self.yw[0] + ys), min(self.yr[-1], self.yw[-1] + ys), 0.01)
-        g = np.interp(yf - ys, self.yw, self.zw) + zc - np.interp(yf, self.yr, self.zr)
-        mins = np.nonzero((g[1:-1] < g[:-2]) & (g[1:-1] <= g[2:]))[0] + 1
-        maxs = np.nonzero((g[1:-1] > g[:-2]) & (g[1:-1] >= g[2:]))[0] + 1
+        """Contact point of each wheel region = minimum of the vertical separation
+        over the region (evaluated on a 0.01 mm resampling)."""
+        split = self.c["frames"]["region_split_y_w_mm"]
         out = []
-        for k in mins:
-            lo = maxs[maxs < k]; hi = maxs[maxs > k]
-            out.append(dict(y=yf[k], g=g[k], gamma=math.atan(np.interp(yf[k], self.yr, self.dzr)),
-                            ylo=yf[lo[-1]] if len(lo) else yf[0], yhi=yf[hi[0]] if len(hi) else yf[-1]))
+        for lo, hi in ((self.yw[0], split), (split, self.yw[-1])):
+            a, b = max(self.yr[0], lo + ys), min(self.yr[-1], hi + ys)
+            if b - a < 0.05:
+                continue
+            yf = np.arange(a, b, 0.01)
+            g = np.interp(yf - ys, self.yw, self.zw) + zc - np.interp(yf, self.yr, self.zr)
+            k = int(np.argmin(g))
+            out.append(dict(y=yf[k], g=g[k], gamma=math.atan(np.interp(yf[k], self.yr, self.dzr)), ylo=a, yhi=b))
         return out
 
     def patch(self, pt, ys, zc):
@@ -84,6 +87,8 @@ class Setup:
         mr = (self.yr >= pt["ylo"]) & (self.yr <= pt["yhi"])
         ywt = self.yw + ys
         mw = (ywt >= pt["ylo"]) & (ywt <= pt["yhi"])
+        if mr.sum() < 3 or mw.sum() < 3:
+            return None
         sr, nr = rot(self.yr[mr], self.zr[mr]); sw, nw = rot(ywt[mw], self.zw[mw] + zc)
         lo, hi = max(sr.min(), sw.min()), min(sr.max(), sw.max())
         el = EL * 1e3

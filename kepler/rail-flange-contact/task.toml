@@ -1,0 +1,45 @@
+schema_version = "1.4"
+
+artifacts = ["/app/output/flange_contact.json"]
+
+[task]
+name = "afterquery/rail-flange-contact"
+description = "Find the equilibrium position and the two contact patches (tread and flange) of a flanging railway wheel under given vertical and lateral loads, yaw and wheel speed, with Kalker's exact rolling-contact theory on each patch, and report each patch's contact angle, normal force and creep forces."
+authors = [{ name = "Deepak Kumar", email = "deepakkumar.dar@gmail.com" }]
+keywords = ["wheel-rail contact", "two-point contact", "flange contact", "Kalker exact theory", "creep forces", "derailment"]
+
+[metadata]
+author_name = "Deepak Kumar"
+author_email = "deepakkumar.dar@gmail.com"
+author_organization = "Independent Researcher"
+author_profile = "https://github.com/deepaksaranay"
+conflicts_of_interest = "None"
+domain = "engineering-sciences"
+field = "mechanical-engineering"
+subfield = "railway vehicle dynamics: two-point wheel-rail flange contact"
+category = "Science"
+subcategory = "Mechanical & Aerospace Engineering"
+tags = ["rolling-contact", "wheel-rail", "flange-contact", "two-point-contact", "boundary-element-method", "derailment-safety"]
+expert_time_estimate_hours = 16
+relevant_experience = "Mechanical engineer with a fluid-mechanics and solid-mechanics computation background; author of previously accepted engineering-computation benchmark tasks. For this task I implemented three multi-point wheel-rail contact solvers with different discretisations, normal and tangential algorithms and equilibrium strategies, and validated the patch solver against Kalker's tabulated creep coefficients."
+difficulty_explanation = "In practice this calculation is done by railway vehicle-dynamics engineers and wheel-rail interface specialists at rolling-stock manufacturers, infrastructure managers and railway research institutes: when a fleet's wheels wear hollow, they compute exact creep-force curves for the measured worn profile on the rail section in service and feed them into multibody vehicle simulations to assess curving behaviour, hunting stability, wear and rolling-contact-fatigue risk and to decide re-profiling intervals; doing it with Kalker's exact theory rather than Hertz/FASTSIM is the expert step for conformal, non-elliptic worn contacts like this one. Synthetic but realistic profiles (rail crown of R300/R80 arcs, hollow-worn wheel tread with a concave R360 band and a shallow wear groove) give a nearly conformal, non-elliptic contact patch (about 206 mm2, 22 x 11 mm, flat-topped asymmetric pressure peaking near 816 MPa). Standard shortcuts fail: a Hertz ellipse from local curvature misses the area by 11.6% and the peak pressure by 10% (force errors up to 3.6% of mu*N), Kalker's linear theory without a slip region is off by up to 45% of mu*N, and the exact method on a 1 mm grid misses forces by up to 3.7%. The agent must implement and converge Kalker's exact theory: gap from the two profiles, half-space normal problem, and the steady-rolling tangential problem with stick/slip, lateral-spin coupling and the transport derivative. Naive Gauss-Seidel on the steady equations diverges (spectral radius 20-100), so a robust formulation is required."
+solution_explanation = "Build the undeformed separation from the profiles plus the wheel's longitudinal curvature; solve the normal problem on 0.4 mm elements with closed-form Boussinesq rectangle influence numbers and an active-set method with the load constraint; obtain steady rolling as the fixed point of Kalker's transient scheme with a one-element rolling step, each step being the convex problem min 1/2 q'Uq + q'(w dx - u_prev) subject to |q| <= mu p with the symmetric Cerruti influence matrix U, solved by accelerated projected gradient (FISTA); sum the tractions. The scheme reproduces Kalker's tabulated creep coefficients for a circular contact within about 1.5%."
+verification_explanation = "The tests read /app/output/creep_forces.json. It must be a regular file (symlinks are rejected) with exactly the documented keys and finite numeric values, and each of the eight cases must appear once. Each case's creep-force vector must be within 2.5% of mu*N (962 N) of the answer key, the contact area within 4% and the peak pressure within 5%. The answer key (tests/answer_key.json) comes from a separate generator (authoring/provenance/problem.py: dense influence matrices, active-set normal solve, transient scheme with projected-gradient steps) run on 0.5 mm and 0.35 mm square grids and Richardson-extrapolated in element size; the shipped solution does not produce it. The tolerances are set by how closely structurally different correct implementations agree with the key, all scored through this verifier. (1) authoring/provenance/independent_submission.py, written separately, uses non-square 0.30 x 0.40 mm elements on an offset grid, FFT convolution of the influence kernels, a Polonsky-Keer conjugate-gradient normal solver and ADMM for each rolling step. It passes 10/10 with a worst force error of 1.35% of mu*N (pure-spin case F), area +1.14% and peak pressure +1.87% (output in authoring/evidence/independent_submission_output.json). (2) The shipped solution/solve.py (0.4 mm grid, FISTA steps) passes 10/10 with a worst force error of 1.81% of mu*N, area +1.70% and peak pressure +1.58%. (3) authoring/provenance/independent_check.py, a steady-state active-set solver on a 0.45 mm grid shifted by a quarter element, passes 10/10 with a worst force error of 1.75%, area +1.51% and peak pressure +0.70%. The generator's own grids differ from the key by at most 1.6% (0.5 mm) and 1.1% (0.35 mm). So correct methods land within 0.7-1.9%, and 2.5% leaves margin for discretisation choices. Incorrect approaches fail: a Hertz ellipse from the local curvature is 11.6% high in area and 10% low in pressure; Kalker's linear theory is off by up to 45% of mu*N; the exact method on a coarse 1 mm grid is off by 3.7% of mu*N and 4.8% in area. A missing file, a symlink to any file, or extra or renamed keys score 0."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[verifier.environment]
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 28800.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 4
+memory_mb = 8192
+storage_mb = 10240
+gpus = 0
+network_mode = "public"

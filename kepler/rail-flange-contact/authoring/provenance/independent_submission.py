@@ -80,22 +80,19 @@ def main(d, out_path):
         return np.interp(y - ys, yw, zw) + zc - np.interp(y, yr, zr)
 
     def contact_points(ys, zc):
-        y = np.union1d(yr, yw + ys)
-        y = y[(y >= max(yr[0], yw[0] + ys)) & (y <= min(yr[-1], yw[-1] + ys))]
-        g = gfun(y, ys, zc)
-        mins = np.nonzero((g[1:-1] < g[:-2]) & (g[1:-1] <= g[2:]))[0] + 1
-        maxs = np.nonzero((g[1:-1] > g[:-2]) & (g[1:-1] >= g[2:]))[0] + 1
+        split = case["frames"]["region_split_y_w_mm"]
         pts = []
-        for k in mins:
-            r = minimize_scalar(lambda t: gfun(t, ys, zc), bounds=(y[k - 1], y[k + 1]), method="bounded", options={"xatol": 1e-7})
-            lo = maxs[maxs < k]; hi = maxs[maxs > k]
-            pts.append((r.x, math.atan(np.interp(r.x, yr, sr_slope)), y[lo[-1]] if len(lo) else y[0], y[hi[0]] if len(hi) else y[-1]))
-        # merge duplicates (flat bottoms)
-        out = []
-        for p in sorted(pts):
-            if not out or abs(p[0] - out[-1][0]) > 0.5:
-                out.append(p)
-        return out
+        for lo, hi in ((yw[0], split), (split, yw[-1])):
+            a, b = max(yr[0], lo + ys), min(yr[-1], hi + ys)
+            if b - a < 0.05:
+                continue
+            y = np.union1d(yr[(yr >= a) & (yr <= b)], yw[(yw + ys >= a) & (yw + ys <= b)] + ys)
+            g = gfun(y, ys, zc)
+            k = int(np.argmin(g))
+            r = minimize_scalar(lambda t: gfun(t, ys, zc), bounds=(y[max(k - 1, 0)], y[min(k + 1, len(y) - 1)]),
+                                method="bounded", options={"xatol": 1e-7})
+            pts.append((r.x, math.atan(np.interp(r.x, yr, sr_slope)), a, b))
+        return pts
 
     def build_patch(pt, ys, zc):
         y0, gm, ylo, yhi = pt

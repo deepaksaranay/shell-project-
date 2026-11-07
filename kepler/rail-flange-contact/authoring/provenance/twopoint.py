@@ -60,23 +60,25 @@ class Model:
         return g
 
     def contact_points(self, ys, zc):
+        """One contact point per wheel region (tread y_w < split, flange y_w >= split):
+        the minimum of the vertical separation over the region (parabolic refinement)."""
         g = self.vgap(ys, zc)
+        split = self.case["frames"]["region_split_y_w_mm"]
         fin = np.isfinite(g)
-        idx = np.nonzero(fin[1:-1] & fin[:-2] & fin[2:] & (g[1:-1] < g[:-2]) & (g[1:-1] <= g[2:]))[0] + 1
-        maxima = np.nonzero(fin[1:-1] & fin[:-2] & fin[2:] & (g[1:-1] > g[:-2]) & (g[1:-1] >= g[2:]))[0] + 1
-        lo_edge = np.nonzero(fin)[0][0]; hi_edge = np.nonzero(fin)[0][-1]
         pts = []
-        for k in idx:
-            # parabolic refinement of the minimum
-            a, b, c3 = g[k - 1], g[k], g[k + 1]
-            den = a - 2 * b + c3
-            d = 0.5 * (a - c3) / den if den > 0 else 0.0
+        for lo, hi in ((self.yw[0], split), (split, self.yw[-1])):
+            sel = np.nonzero(fin & (self.yr - ys >= lo) & (self.yr - ys < hi))[0]
+            if len(sel) < 3:
+                continue
+            k = sel[np.argmin(g[sel])]
+            d = 0.0
+            if sel[0] < k < sel[-1]:
+                a, b, c3 = g[k - 1], g[k], g[k + 1]
+                den = a - 2 * b + c3
+                d = float(np.clip(0.5 * (a - c3) / den, -0.5, 0.5)) if den > 0 else 0.0
             yc = self.yr[k] + d * (self.yr[k + 1] - self.yr[k])
-            left = maxima[maxima < k]; right = maxima[maxima > k]
-            ylo = self.yr[left[-1]] if len(left) else self.yr[lo_edge]
-            yhi = self.yr[right[0]] if len(right) else self.yr[hi_edge]
             gam = math.atan(float(np.interp(yc, self.yr, self.slope_r)))
-            pts.append({"y": yc, "gmin": b - 0.25 * (a - c3) * d, "gamma": gam, "ylo": ylo, "yhi": yhi})
+            pts.append({"y": yc, "gmin": g[k], "gamma": gam, "ylo": lo + ys, "yhi": hi + ys})
         return pts
 
     def patch_gap(self, pt, ys, zc):
@@ -103,8 +105,8 @@ class Model:
             o = np.argsort(s)
             return np.interp(q, s[o], n[o], left=np.nan, right=np.nan)
         # restrict to the local branch: rail/wheel points within the basin y-range
-        mr = (self.yr >= pt["ylo"] - 1) & (self.yr <= pt["yhi"] + 1)
-        mw = (ywt >= pt["ylo"] - 1) & (ywt <= pt["yhi"] + 1)
+        mr = (self.yr >= pt["ylo"]) & (self.yr <= pt["yhi"])
+        mw = (ywt >= pt["ylo"]) & (ywt <= pt["yhi"])
         hs = (interp_mono(sw[mw], nw[mw], sc) - interp_mono(sr[mr], nr[mr], sc)) * 1e-3
         keep = np.isfinite(hs) & (hs < 0.25e-3)
         sc, hs = sc[keep], hs[keep]
