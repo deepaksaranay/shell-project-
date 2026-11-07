@@ -142,7 +142,7 @@ copy of the answer key, and writes the pytest output to
 | `solution/solve.py` (shipped) | 0.4 mm, active-set normal, FISTA, Broyden equilibrium | 29% | 6/6 |
 | generator at 0.4 mm | coarser grid | 23% | 6/6 |
 
-The independent submission's worst errors are 85 N in normal force, 105 N
+The independent submission's worst errors are 85 N in normal force, 107 N
 in creep force, 0.045° in contact angle and 0.0002 mm in shift.
 
 Correct methods sit well inside the limits, and the shortcuts above fail.

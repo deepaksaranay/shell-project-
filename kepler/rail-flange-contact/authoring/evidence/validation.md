@@ -48,11 +48,11 @@ worst share of limit: {'shift': '4%', 'angle': '29%', 'N': '21%', 'F': '22%'}
 
 ```
 A  shift +0.0001  tread: ang +0.003 N +14 F 3  flange: ang -0.042 N -7 F 3
-B  shift +0.0001  tread: ang -0.003 N +54 F 9  flange: ang -0.037 N -11 F 52
-C  shift +0.0001  tread: ang -0.003 N +33 F 21  flange: ang -0.037 N -30 F 105
+B  shift +0.0001  tread: ang -0.003 N +54 F 9  flange: ang -0.037 N -10 F 52
+C  shift +0.0001  tread: ang +0.001 N +32 F 23  flange: ang -0.037 N -25 F 107
 D  shift -0.0002  tread: ang +0.001 N -25 F 80  flange: ang -0.045 N +85 F 28
-E  shift +0.0000  tread: ang -0.004 N +46 F 11  flange: ang -0.037 N -8 F 42
-F  shift +0.0001  tread: ang +0.003 N +65 F 50  flange: ang -0.037 N -61 F 65
+E  shift +0.0000  tread: ang -0.006 N +47 F 12  flange: ang -0.037 N -10 F 41
+F  shift +0.0001  tread: ang +0.004 N +66 F 50  flange: ang -0.037 N -63 F 64
 worst share of limit: {'shift': '2%', 'angle': '15%', 'N': '11%', 'F': '13%'}
 ```
 
