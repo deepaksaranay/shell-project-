@@ -15,8 +15,9 @@ verifier. Every stage uses a different algorithm or discretisation:
     upstream displacements come from the FFT convolution of the previous
     traction field.
 
-Usage: python3 independent_submission.py <data_dir> <output_json>
+Usage: python3 independent_submission.py <data_dir> <output_json> [case_ids]
 """
+import glob
 import json
 import math
 import os
@@ -144,12 +145,19 @@ def main(data_dir, out_path):
         f = np.where(n > gbound, gbound / np.maximum(n, 1e-300), 1.0)
         return np.concatenate([vx * f, vy * f])
 
-    ckpt = out_path + ".partial.json"
-    done = json.load(open(ckpt)) if os.path.exists(ckpt) else {}
+    # checkpoints: one file per worker; a run with a case subset (argv[3],
+    # e.g. "DE") only solves those cases, so cases can run in parallel
+    subset = sys.argv[3] if len(sys.argv) > 3 else None
+    ckpt = out_path + (f".partial.{subset}.json" if subset else ".partial.json")
+    done = {}
+    for f in sorted(glob.glob(out_path + ".partial*.json")):
+        done.update(json.load(open(f)))
     results = []
     for cs in case["creepage_cases"]:
         if cs["id"] in done:  # resume after an interruption
             results.append(done[cs["id"]])
+            continue
+        if subset and cs["id"] not in subset:
             continue
         w = np.concatenate([cs["xi"] - cs["phi_per_m"] * Yg[I], cs["eta"] + cs["phi_per_m"] * Xg[I]]) * DX
         q = np.zeros(2 * m); z = np.zeros(2 * m); lam = np.zeros(2 * m)
@@ -169,8 +177,12 @@ def main(data_dir, out_path):
                 break
         results.append({"id": cs["id"], "Fx_N": float(q[:m].sum() * dA), "Fy_N": float(q[m:].sum() * dA)})
         done[cs["id"]] = results[-1]
-        json.dump(done, open(ckpt, "w"))
+        mine = json.load(open(ckpt)) if os.path.exists(ckpt) else {}
+        mine[cs["id"]] = results[-1]
+        json.dump(mine, open(ckpt, "w"))
         print(results[-1], "steps", step + 1, flush=True)
+    if len(results) < len(case["creepage_cases"]):
+        return
     out = {"contact_area_mm2": float(area * 1e6), "max_pressure_MPa": float(p.max() / 1e6), "cases": results}
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2)
