@@ -26,6 +26,6 @@ Requirements:
 - For every case, the force vector (Fx, Fy) is within 2.5% of μN of the exact-theory solution, where μN is the friction coefficient times the normal load.
 - The contact area is within 4% of the exact-theory value.
 - The maximum contact pressure is within 5% of the exact-theory value.
-- All eight cases are present, and every value is a finite number.
+- The file is a regular JSON file with exactly the keys shown above: top-level `contact_area_mm2`, `max_pressure_MPa` and `cases`, and `id`, `Fx_N` and `Fy_N` in each case. All eight cases are present once, and every value is a finite number.
 
 You have 28800 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.

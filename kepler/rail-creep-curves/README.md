@@ -8,6 +8,21 @@ contact area and the peak pressure.
 
 ## Difficulty
 
+**Who does this work.** In practice this calculation is done by railway
+vehicle-dynamics engineers and wheel–rail interface specialists at
+rolling-stock manufacturers, infrastructure managers and railway research
+institutes. When a fleet's wheels wear hollow, they compute exact
+creep-force curves for the measured worn profile on the rail section in
+service. Those curves feed multibody vehicle simulations that assess:
+
+- curving behaviour;
+- hunting stability;
+- wear and rolling-contact-fatigue risk;
+- when to re-profile the wheels.
+
+Using Kalker's exact theory instead of Hertz/FASTSIM is the expert step for
+conformal, non-elliptic worn contacts like this one.
+
 The profiles and operating data are synthetic but realistic. The rail crown
 is made of R300 and R80 arcs, and the hollow-worn wheel tread has a concave
 R360 band plus a shallow wear groove. They ship in

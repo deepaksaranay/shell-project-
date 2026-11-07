@@ -1,0 +1,50 @@
+{
+ "load_case": {
+  "friction_coefficient": 0.35,
+  "normal_load": 110000.0
+ },
+ "normal_contact": {
+  "area_mm2": 206.09,
+  "peak_pressure_MPa": 815.6
+ },
+ "creep_forces_N": {
+  "A": [
+   -9489.1,
+   -1.7
+  ],
+  "B": [
+   -29283.0,
+   -23.6
+  ],
+  "C": [
+   -25.4,
+   -14532.3
+  ],
+  "D": [
+   -80.5,
+   -32430.9
+  ],
+  "E": [
+   -16492.5,
+   -13544.1
+  ],
+  "F": [
+   -7649.3,
+   -15029.6
+  ],
+  "G": [
+   -16872.2,
+   -16243.9
+  ],
+  "H": [
+   17221.3,
+   14648.4
+  ]
+ },
+ "limits": {
+  "force_vs_mu_N": 0.025,
+  "area_rel": 0.04,
+  "peak_pressure_rel": 0.05
+ },
+ "provenance": "Kalker exact half-space rolling contact; authoring/provenance/problem.py at 0.5 and 0.35 mm elements, Richardson-extrapolated."
+}
