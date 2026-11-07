@@ -1,0 +1,45 @@
+schema_version = "1.4"
+
+artifacts = ["/app/output/heatshield_response.json"]
+
+[task]
+name = "afterquery/ablator-bondline-response"
+description = "Compute the in-depth thermal response of a charring heat-shield ablator on an aluminium structure over an entry heating pulse: surface recession, surface and bondline temperatures, pyrolysis and char front depths, mass loss and the peak bondline temperature during heat soak."
+authors = [{ name = "Deepak Kumar", email = "deepakkumar.dar@gmail.com" }]
+keywords = ["charring ablation", "thermal protection system", "pyrolysis", "surface recession", "B-prime thermochemistry", "atmospheric entry"]
+
+[metadata]
+author_name = "Deepak Kumar"
+author_email = "deepakkumar.dar@gmail.com"
+author_organization = "Independent Researcher"
+author_profile = "https://github.com/deepaksaranay"
+conflicts_of_interest = "None"
+domain = "engineering-sciences"
+field = "mechanical-engineering"
+subfield = "aerospace thermal protection: charring-ablator heat-shield response"
+category = "Science"
+subcategory = "Mechanical & Aerospace Engineering"
+tags = ["ablation", "thermal-protection-system", "heat-shield", "pyrolysis", "moving-boundary", "atmospheric-entry"]
+expert_time_estimate_hours = 14
+relevant_experience = "Mechanical engineer with a heat-transfer, fluid-mechanics and solid-mechanics computation background; author of previously accepted engineering-computation benchmark tasks. For this task I implemented and cross-checked three charring-ablation codes with different discretisations (contracting-grid finite volumes, a Landau-transformed finite-difference form and a material-fixed grid with cell consumption), and verified them against an analytic slab solution."
+difficulty_explanation = "In practice this analysis is done by thermal-protection-system engineers at spacecraft and entry-vehicle developers, space agencies and their contractors. They size heat-shield thickness so that the bondline to the aluminium structure stays below the adhesive limit through entry and the heat soak after it, and the same models are used to rebuild flight data. The task needs a full one-dimensional charring-ablation code: three-component Arrhenius decomposition, pyrolysis gas carrying energy out through the char, a receding surface, absolute (formation-referenced) enthalpies that set the heat of pyrolysis, temperature-dependent virgin/char property blending, an aluminium substrate, and a surface energy balance with a B'-table where the blowing-corrected film coefficient depends on B'_c(T_w, B'_g) and B'_g depends on that coefficient, so it has to be solved as a fixed point at every instant. Errors in any one piece move the answer well outside the limits: dropping the blowing correction gives 23% too much recession and a surface 225 K too hot; ignoring the heat picked up by the pyrolysis gas makes the bondline 37 K too hot; ignoring recession or reading B'_c at B'_g = 0 fails recession and mass loss; a coarse 12-node grid is 15 K off at the bondline. The moving surface also makes the bookkeeping easy to get subtly wrong: while building the answer-key generator I found two such bugs (an upwind index in the grid-motion transport and a missing fibre-mass term) that each shifted the bondline by several kelvin while every other check still looked plausible. The material, thermochemistry and trajectory are synthetic but realistic (a mid-density phenolic-type ablator, 22 mm thick, on 3 mm aluminium, peak cold-wall heating of a few MW/m2), so no published result can be reused."
+solution_explanation = "solution/solve.py writes the energy equation in the non-conservative form rho cp dT/dt = d/dx(k dT/dx) + mdot dh_g/dx + (h_g - hbar) drho/dt, with hbar = (rho_v h_v - rho_c h_c)/(rho_v - rho_c) and the gas flux from integrating the decomposition rate. It transforms the equation to the Landau coordinate eta = (x - s)/(L - s) that follows the receding surface and discretises it with finite differences on a graded 150-node grid. The surface temperature is the root of the surface energy balance against a second-order one-sided conduction flux, with the blowing-corrected film coefficient solved by an inner root find at each evaluation. The ablator/aluminium interface is a two-material half-cell, and the system is integrated with Radau. It takes about 6 minutes."
+verification_explanation = "The tests read /app/output/heatshield_response.json. It must be a regular file (symlinks are rejected) with exactly the documented keys, one snapshot per output time and finite numbers. At each of the eight output times they check: recession within 3% + 0.01 mm, surface temperature within 12 K, bondline temperature within 3 K, pyrolysis- and char-front depths within 3% + 0.1 mm, and mass loss within 2% + 0.01 kg/m2. The peak bondline temperature must be within 3 K. The answer key (tests/answer_key.json) comes from a separate generator (authoring/provenance/ablation.py: conservative finite volumes on a contracting surface-attached grid with Reynolds-transport terms, BDF integration) with 480 ablator nodes; its 240-node run differs by at most 0.30 K and 0.3%. The shipped solution does not produce the key. The limits are set from how closely structurally different correct implementations agree with the key, all scored through this verifier. (1) authoring/provenance/independent_submission.py, written separately, uses a material-fixed uniform cell-centred grid that consumes and merges surface cells instead of moving the grid, its own backward-Euler stepping with Picard iterations and a series-resistance bondline. It passes 7/7, using at most 8% of any limit (bondline error 0.01 K, peak bondline +0.006 K, char front +0.016 mm). (2) The shipped solution/solve.py passes 7/7, using at most 21% of any limit (bondline +0.62 K, peak bondline +0.53 K, pyrolysis front +0.061 mm). (3) Correct physics on deliberately modest grids also passes: 60 and 100 uniform nodes and 60 graded nodes all pass 7/7 (60 uniform nodes: peak bondline +2.3 K). Flawed models fail: no blowing correction (recession +23%, surface +225 K); gas convection ignored (bondline +37 K); no recession; B'_c read at B'_g = 0 (recession -5.7%); a 12-node grid (bondline +15 K, surface -85 K). A missing file, a symlink, a copy of the answer key, or extra or renamed keys all score 0."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[verifier.environment]
+network_mode = "no-network"
+
+[agent]
+timeout_sec = 28800.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 4
+memory_mb = 8192
+storage_mb = 10240
+gpus = 0
+network_mode = "public"

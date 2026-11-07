@@ -1,0 +1,87 @@
+{
+ "snapshots": [
+  {
+   "t_s": 20,
+   "recession_mm": 0.14825350933082923,
+   "surface_temperature_K": 1904.1753078018753,
+   "bondline_temperature_K": 299.99999708980243,
+   "pyrolysis_front_depth_mm": 3.0845467687349366,
+   "char_front_depth_mm": 0.24997020440217543,
+   "mass_loss_kg_per_m2": 0.5551942856079585
+  },
+  {
+   "t_s": 40,
+   "recession_mm": 0.9198688774722673,
+   "surface_temperature_K": 2511.7773984240926,
+   "bondline_temperature_K": 300.0016412093483,
+   "pyrolysis_front_depth_mm": 5.543147471917933,
+   "char_front_depth_mm": 2.202789663667931,
+   "mass_loss_kg_per_m2": 1.5328570202646474
+  },
+  {
+   "t_s": 60,
+   "recession_mm": 2.080188854497048,
+   "surface_temperature_K": 2513.368548032834,
+   "bondline_temperature_K": 300.0855036706909,
+   "pyrolysis_front_depth_mm": 7.094659856935747,
+   "char_front_depth_mm": 3.2020559833875093,
+   "mass_loss_kg_per_m2": 2.537968157639499
+  },
+  {
+   "t_s": 80,
+   "recession_mm": 3.056175526051315,
+   "surface_temperature_K": 2031.2265918025878,
+   "bondline_temperature_K": 300.8433145239912,
+   "pyrolysis_front_depth_mm": 8.352173181370405,
+   "char_front_depth_mm": 3.621899491982961,
+   "mass_loss_kg_per_m2": 3.3357757058851076
+  },
+  {
+   "t_s": 100,
+   "recession_mm": 3.479397605250419,
+   "surface_temperature_K": 1246.6333118120608,
+   "bondline_temperature_K": 303.8846503158929,
+   "pyrolysis_front_depth_mm": 9.63397073213409,
+   "char_front_depth_mm": 3.689319350735239,
+   "mass_loss_kg_per_m2": 3.7559743147393916
+  },
+  {
+   "t_s": 150,
+   "recession_mm": 3.51036790412889,
+   "surface_temperature_K": 643.4261809734243,
+   "bondline_temperature_K": 329.72692123467016,
+   "pyrolysis_front_depth_mm": 11.874796794414749,
+   "char_front_depth_mm": 3.716704032196461,
+   "mass_loss_kg_per_m2": 3.9382217887468296
+  },
+  {
+   "t_s": 300,
+   "recession_mm": 3.510900126686572,
+   "surface_temperature_K": 465.6500253766228,
+   "bondline_temperature_K": 405.2921306198931,
+   "pyrolysis_front_depth_mm": 13.039998845725362,
+   "char_front_depth_mm": 3.7167199967359306,
+   "mass_loss_kg_per_m2": 3.978281077214114
+  },
+  {
+   "t_s": 600,
+   "recession_mm": 3.51112582462622,
+   "surface_temperature_K": 413.1315705449587,
+   "bondline_temperature_K": 425.64873713654134,
+   "pyrolysis_front_depth_mm": 13.314821775065646,
+   "char_front_depth_mm": 3.716491096494088,
+   "mass_loss_kg_per_m2": 3.9855058687664715
+  }
+ ],
+ "peak": {
+  "peak_bondline_temperature_K": 425.749727178708,
+  "time_of_peak_s": 566.8512526286803,
+  "peak_surface_temperature_K": 2577.576646021405
+ },
+ "grid": {
+  "Na": 240,
+  "Ns": 8,
+  "beta": 4.0,
+  "rtol": 1e-07
+ }
+}

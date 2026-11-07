@@ -1,0 +1,79 @@
+{
+  "description": "Stagnation-point heat-shield response: charring ablator bonded to an aluminium structure",
+  "ablator": {
+    "thickness_mm": 22.0,
+    "decomposition": {
+      "model": "three-component: rho = Gamma*(rho_A + rho_B) + (1 - Gamma)*rho_C; for i in A, B: d(rho_i)/dt = -k_i * rho_v_i * ((rho_i - rho_r_i)/rho_v_i)**psi_i * exp(-E_over_R_i / T); C does not decompose",
+      "Gamma": 0.5,
+      "components": {
+        "A": {
+          "rho_v_kg_per_m3": 230.0,
+          "rho_r_kg_per_m3": 0.0,
+          "k_per_s": 16000.0,
+          "E_over_R_K": 8700.0,
+          "psi": 3.0
+        },
+        "B": {
+          "rho_v_kg_per_m3": 690.0,
+          "rho_r_kg_per_m3": 460.0,
+          "k_per_s": 3900000000.0,
+          "E_over_R_K": 20300.0,
+          "psi": 3.0
+        },
+        "C": {
+          "rho_kg_per_m3": 300.0
+        }
+      }
+    },
+    "virgin": {
+      "properties_file": "virgin_properties.csv",
+      "formation_enthalpy_J_per_kg_at_298K": -1050000.0
+    },
+    "char": {
+      "properties_file": "char_properties.csv",
+      "formation_enthalpy_J_per_kg_at_298K": 0.0
+    },
+    "pyrolysis_gas": {
+      "enthalpy_file": "pyrolysis_gas.csv"
+    },
+    "property_mixing": "Solid cp, k, emissivity and absorptivity are blended between char and virgin with the virgin mass fraction y_v = rho_v*(rho - rho_c)/(rho*(rho_v - rho_c)): property = y_v*virgin + (1 - y_v)*char. The solid enthalpy per unit mass is h = y_v*h_v(T) + (1 - y_v)*h_c(T), with h_v(T) = h_f,v + integral from 298 K of cp_v dT and likewise for char."
+  },
+  "substrate": {
+    "material": "aluminium",
+    "thickness_mm": 3.0,
+    "density_kg_per_m3": 2700.0,
+    "properties_file": "substrate_properties.csv",
+    "bond": "perfect thermal contact, impermeable to pyrolysis gas"
+  },
+  "back_face": "adiabatic",
+  "initial_temperature_K": 300.0,
+  "surface": {
+    "thermochemistry_file": "surface_thermochemistry.csv",
+    "absorptivity_equals_emissivity": true,
+    "radiation_sink_temperature_K": 300.0,
+    "blowing_correction": "C_H = C_H0 * ln(1 + 2*lambda*B') / (2*lambda*B'), B' = B'_c + B'_g, lambda = 0.5 (C_H = C_H0 at B' = 0)",
+    "definitions": "B'_g = mdot_g / (rhoe_ue_CH), B'_c = mdot_c / (rhoe_ue_CH), with rhoe_ue_CH the blowing-corrected value; the char removal rate mdot_c gives the recession rate sdot = mdot_c / rho_w, rho_w the solid density at the surface",
+    "energy_balance": "rhoe_ue_CH*(h_r - h_w) + mdot_g*h_g(T_w) + mdot_c*h_s(T_w) - (mdot_g + mdot_c)*h_w + alpha*q_rad_in - eps*sigma*(T_w**4 - T_sink**4) = conducted heat flux into the solid at the surface",
+    "pyrolysis_gas": "flows to the heated surface instantaneously without storage, in thermal equilibrium with the solid; mdot_g is the total decomposition rate integrated through the thickness"
+  },
+  "interpolation": "All tables are interpolated linearly (thermochemistry: bilinear in T_w and B'_g; cp linear in T so that h(T) is its exact integral); values outside a table are held at the end value.",
+  "stefan_boltzmann_W_per_m2K4": 5.670374419e-08,
+  "output_times_s": [
+    20,
+    40,
+    60,
+    80,
+    100,
+    150,
+    300,
+    600
+  ],
+  "definitions_for_output": {
+    "recession_mm": "surface recession s(t) from the original surface",
+    "surface_temperature_K": "T_w(t)",
+    "bondline_temperature_K": "temperature at the ablator/aluminium interface",
+    "pyrolysis_front_depth_mm": "depth below the current surface where the density degree tau = (rho - rho_c)/(rho_v - rho_c) first reaches 0.98, linear interpolation between grid values",
+    "char_front_depth_mm": "depth below the current surface where tau first reaches 0.02",
+    "mass_loss_kg_per_m2": "integral of mdot_g + mdot_c from 0 to t"
+  }
+}
