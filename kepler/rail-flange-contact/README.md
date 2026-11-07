@@ -122,8 +122,19 @@ Its 0.4 mm run passes using at most 23% of any limit. The shipped solution
 doesn't produce the key.
 
 **How the limits were set.** The limits come from how closely structurally
-different correct implementations agree. Each one was scored through the
-verifier:
+different correct implementations agree. Each one was scored by running the
+unchanged `tests/test_outputs.py` on an output file in exactly the task's
+schema. `authoring/run_verifier_checks.sh` runs every file in
+`authoring/evidence/verifier_inputs/`, plus a missing file, a symlink and a
+copy of the answer key, and writes the pytest output to
+`authoring/evidence/verifier_runs.log`. Which file each check uses:
+
+- independent submission: `independent_submission.json`, the script's own
+  output (`authoring/evidence/independent_submission_output.json`);
+- shipped solution: `oracle.json`;
+- generator and shortcut runs: `generator_el0.4.json` and
+  `baseline_*.json`, exported to the output schema by
+  `authoring/provenance/export_for_verifier.py`.
 
 | implementation | how it differs | largest share of a limit | result |
 |---|---|---|---|
@@ -138,4 +149,4 @@ Correct methods sit well inside the limits, and the shortcuts above fail.
 A missing file, a symlink, a copy of the answer key, or extra or renamed
 keys all score 0.
 
-Outputs are in `authoring/evidence/`.
+All outputs and the verifier log are in `authoring/evidence/`.

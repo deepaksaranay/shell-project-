@@ -1,8 +1,19 @@
 # Validation record
 
-## Verifier emulation
+## Verifier runs
 
-The emulation used the same `test_outputs.py` with pytest.
+`authoring/run_verifier_checks.sh` copies `tests/`, points the result path
+at a scratch file, and runs the unchanged `test_outputs.py` once per file
+in `verifier_inputs/`. Every file there is in exactly the output schema:
+
+- `oracle.json`: the output of `solution/solve.py`;
+- `independent_submission.json`: the output of
+  `authoring/provenance/independent_submission.py`, which writes the schema
+  itself;
+- `generator_el0.4.json` and `baseline_*.json`: generator and shortcut
+  results exported by `authoring/provenance/export_for_verifier.py`.
+
+The full pytest output is in `verifier_runs.log`.
 
 | output | result |
 |---|---|

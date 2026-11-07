@@ -252,16 +252,15 @@ def main(d, out_path):
                 Fx_, Fs_, wq = tangential(P, p, creep, warm.get(kind))
                 warm[kind] = wq
                 new[kind] = (Fx_, Fs_)
-                info[kind] = {"contact_angle_deg": math.degrees(P["gamma"]), "normal_force_N": N,
-                              "area_mm2": float((p > 0).sum() * DX * DS * 1e6), "max_pressure_MPa": float(p.max() / 1e6),
-                              "Fx_N": Fx_, "Fs_N": Fs_}
+                info[kind] = {"contact_angle_deg": math.degrees(P["gamma"]), "normal_force_N": float(N),
+                              "Fx_N": float(Fx_), "Fs_N": float(Fs_)}
             change = max([abs(new[k][j] - tang.get(k, (0, 0))[j]) for k in new for j in (0, 1)] + [0.0])
             tang = new
             print(cs["id"], outer, round(ys, 5), round(zc, 6), {k: round(v["normal_force_N"]) for k, v in info.items()}, round(change, 1), flush=True)
             if change < 2e-4 * Q:
                 break
-        rec = {"id": cs["id"], "lateral_shift_mm": float(ys), "tread": info.get("tread"), "flange": info.get("flange"),
-               "total_Fx_N": float(sum(v[0] for v in tang.values()))}
+        # exactly the output schema required by the task (written as the agent would)
+        rec = {"id": cs["id"], "lateral_shift_mm": float(ys), "tread": info.get("tread"), "flange": info.get("flange")}
         results.append(rec); done[cs["id"]] = rec
         json.dump(done, open(ckpt, "w"))
     json.dump({"cases": results}, open(out_path, "w"), indent=2)
